@@ -53,8 +53,10 @@
                     <div class="perfil-rating text-center mb-3">
                         {% if trabalhador.avaliacao_media > 0 %}
                             {% for i in "12345" %}
-                                {% if forloop.counter <= trabalhador.avaliacao_media %}
+                                {% if forloop.counter <= trabalhador.avaliacao_media|floatformat:0|add:0 %}
                                     <i class="fas fa-star text-warning"></i>
+                                {% elif forloop.counter <= trabalhador.avaliacao_media|floatformat:0|add:1 and trabalhador.avaliacao_media|floatformat:1|slice:"-1" != "0" %}
+                                    <i class="fas fa-star-half-alt text-warning"></i>
                                 {% else %}
                                     <i class="far fa-star text-muted"></i>
                                 {% endif %}

@@ -17,6 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+# Customizações do admin
+admin.site.site_header = 'Administração - Cooperativa Rural'
+admin.site.site_title = 'Cooperativa Rural'
+admin.site.index_title = 'Painel Administrativo'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),

@@ -124,3 +124,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Admin customization
+ADMIN_SITE_HEADER = 'Administração - Cooperativa Rural'
+ADMIN_SITE_TITLE = 'Cooperativa Rural'
+ADMIN_INDEX_TITLE = 'Painel Administrativo'
