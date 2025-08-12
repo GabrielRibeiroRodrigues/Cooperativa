@@ -1,0 +1,330 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalhes do Serviço - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-clipboard-list me-2"></i>Detalhes do Serviço</h1>
+            <span class="badge bg-{% if servico.status == 'pendente' %}warning{% elif servico.status == 'aceito' %}info{% elif servico.status == 'concluido' %}success{% else %}secondary{% endif %} fs-6">
+                {{ servico.get_status_display }}
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Informações do Serviço -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Informações do Serviço
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Contratante:</strong> {{ servico.contratante.get_full_name|default:servico.contratante.username }}</p>
+                        <p><strong>Trabalhador:</strong> {{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}</p>
+                        <p><strong>Data do Serviço:</strong> {{ servico.data_servico|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Valor Acordado:</strong> R$ {{ servico.valor_acordado|floatformat:2 }}</p>
+                        <p><strong>Data de Criação:</strong> {{ servico.data_criacao|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Status:</strong> {{ servico.get_status_display }}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <strong>Descrição:</strong>
+                    <p class="mt-2">{{ servico.descricao|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controle de Jornada (apenas para trabalhador e serviço aceito) -->
+        {% if user == servico.trabalhador and servico.status == 'aceito' %}
+        <div class="card mb-4" id="controle-jornada">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Controle de Jornada
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="jornada-status-container">
+                    <!-- Conteúdo será atualizado via JavaScript -->
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Controles de Jornada (histórico) -->
+        {% if controles %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Histórico de Jornadas
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for controle in controles %}
+                    <div class="timeline-item">
+                        <h6>{{ controle.data|date:"d/m/Y" }}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {% if controle.hora_inicio %}
+                                    <p><strong>Início:</strong> {{ controle.hora_inicio|time:"H:i" }}</p>
+                                {% endif %}
+                                {% if controle.hora_pausa %}
+                                    <p><strong>Pausa:</strong> {{ controle.hora_pausa|time:"H:i" }}</p>
+                                {% endif %}
+                                {% if controle.hora_retorno %}
+                                    <p><strong>Retorno:</strong> {{ controle.hora_retorno|time:"H:i" }}</p>
+                                {% endif %}
+                                {% if controle.hora_fim %}
+                                    <p><strong>Fim:</strong> {{ controle.hora_fim|time:"H:i" }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if controle.total_horas > 0 %}
+                                    <p><strong>Total de Horas:</strong> {{ controle.total_horas }}h</p>
+                                    {% if controle.total_horas >= 8 %}
+                                        <small class="text-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Atenção: 8+ horas trabalhadas
+                                        </small>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if controle.observacoes %}
+                            <p><strong>Observações:</strong> {{ controle.observacoes }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ações do Trabalhador -->
+        {% if user == servico.trabalhador and servico.status == 'pendente' %}
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5 class="text-muted mb-3">Este serviço está aguardando sua resposta</h5>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'aceitar_servico' servico.id %}" 
+                       class="btn btn-success" 
+                       onclick="return confirm('Deseja aceitar este serviço?')">
+                        <i class="fas fa-check me-2"></i>Aceitar
+                    </a>
+                    <a href="{% url 'recusar_servico' servico.id %}" 
+                       class="btn btn-danger" 
+                       onclick="return confirm('Deseja recusar este serviço?')">
+                        <i class="fas fa-times me-2"></i>Recusar
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Avaliação -->
+        {% if pode_avaliar %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Avaliar Trabalhador
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="avaliacao" value="1">
+                    
+                    <div class="mb-3">
+                        <label for="{{ form_avaliacao.nota.id_for_label }}" class="form-label">{{ form_avaliacao.nota.label }}</label>
+                        {{ form_avaliacao.nota }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form_avaliacao.comentario.id_for_label }}" class="form-label">{{ form_avaliacao.comentario.label }}</label>
+                        {{ form_avaliacao.comentario }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-star me-2"></i>Enviar Avaliação
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Chat -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>Chat
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="chat-messages" id="chat-messages">
+                    {% for mensagem in mensagens %}
+                        <div class="chat-message {% if mensagem.remetente == user %}own{% else %}other{% endif %}">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ mensagem.remetente.get_full_name|default:mensagem.remetente.username }}</strong>
+                                <small class="text-muted">{{ mensagem.data_envio|date:"d/m H:i" }}</small>
+                            </div>
+                            <div class="mt-1">{{ mensagem.conteudo|linebreaks }}</div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted p-4">
+                            <i class="fas fa-comment fa-2x mb-2"></i>
+                            <p>Nenhuma mensagem ainda</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card-footer">
+                <form method="post" id="chat-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="mensagem" value="1">
+                    
+                    <div class="input-group">
+                        {{ form_mensagem.conteudo }}
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user == servico.trabalhador and servico.status == 'aceito' %}
+<script>
+let jornadaStatusInterval;
+
+function atualizarStatusJornada() {
+    fetch('{% url "status_jornada_ajax" servico.id %}')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('jornada-status-container');
+            let statusClass = '';
+            let statusText = '';
+            let botoes = '';
+            
+            switch(data.status) {
+                case 'nao_iniciada':
+                    statusClass = 'nao-iniciada';
+                    statusText = 'Jornada não iniciada';
+                    botoes = `<a href="{% url 'controle_jornada' servico.id 'iniciar' %}" class="btn btn-success">
+                        <i class="fas fa-play me-1"></i>Iniciar Jornada
+                    </a>`;
+                    break;
+                case 'em_andamento':
+                    statusClass = 'em-andamento';
+                    statusText = 'Jornada em andamento';
+                    botoes = `
+                        <a href="{% url 'controle_jornada' servico.id 'pausar' %}" class="btn btn-warning me-2">
+                            <i class="fas fa-pause me-1"></i>Pausar
+                        </a>
+                        <a href="{% url 'controle_jornada' servico.id 'finalizar' %}" class="btn btn-danger" 
+                           onclick="return confirm('Deseja finalizar a jornada de trabalho?')">
+                            <i class="fas fa-stop me-1"></i>Finalizar
+                        </a>
+                    `;
+                    break;
+                case 'pausada':
+                    statusClass = 'pausada';
+                    statusText = 'Jornada pausada (almoço)';
+                    botoes = `<a href="{% url 'controle_jornada' servico.id 'retomar' %}" class="btn btn-info">
+                        <i class="fas fa-play me-1"></i>Retomar
+                    </a>`;
+                    break;
+                case 'finalizada':
+                    statusClass = 'finalizada';
+                    statusText = `Jornada finalizada - Total: ${data.total_horas}h`;
+                    break;
+            }
+            
+            let alertaHtml = '';
+            if (data.alerta_8h && data.status !== 'finalizada') {
+                alertaHtml = `
+                    <div class="alerta-8h">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Atenção:</strong> Você já trabalhou 8 horas hoje!
+                    </div>
+                `;
+            }
+            
+            let horasHtml = '';
+            if (data.hora_inicio) {
+                horasHtml = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            ${data.hora_inicio ? `<p><strong>Início:</strong> ${data.hora_inicio}</p>` : ''}
+                            ${data.hora_pausa ? `<p><strong>Pausa:</strong> ${data.hora_pausa}</p>` : ''}
+                            ${data.hora_retorno ? `<p><strong>Retorno:</strong> ${data.hora_retorno}</p>` : ''}
+                            ${data.hora_fim ? `<p><strong>Fim:</strong> ${data.hora_fim}</p>` : ''}
+                        </div>
+                        <div class="col-md-6">
+                            ${data.total_horas > 0 ? `<p><strong>Total:</strong> ${data.total_horas}h</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = `
+                <div class="jornada-status ${statusClass}">
+                    <i class="fas fa-clock me-2"></i>${statusText}
+                </div>
+                ${alertaHtml}
+                ${horasHtml}
+                <div class="text-center">
+                    ${botoes}
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Erro ao atualizar status da jornada:', error);
+        });
+}
+
+// Atualizar status imediatamente e depois a cada 30 segundos
+document.addEventListener('DOMContentLoaded', function() {
+    atualizarStatusJornada();
+    jornadaStatusInterval = setInterval(atualizarStatusJornada, 30000);
+});
+
+// Parar atualização quando sair da página
+window.addEventListener('beforeunload', function() {
+    if (jornadaStatusInterval) {
+        clearInterval(jornadaStatusInterval);
+    }
+});
+</script>
+{% endif %}
+
+<script>
+// Scroll automático do chat para a última mensagem
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+});
+
+// Limpar campo de mensagem após envio
+document.getElementById('chat-form').addEventListener('submit', function(e) {
+    setTimeout(function() {
+        const textarea = document.querySelector('#chat-form textarea');
+        if (textarea) {
+            textarea.value = '';
+        }
+    }, 100);
+});
+</script>
+{% endblock %}

@@ -364,10 +364,30 @@ def status_jornada_ajax(request, servico_id):
     
     try:
         controle = ControleJornada.objects.get(servico=servico, data=hoje)
+        
+        # Calcular horas atuais se estiver em andamento
+        horas_atuais = 0
+        if controle.status_jornada in ['em_andamento', 'pausada']:
+            agora = timezone.now()
+            if controle.status_jornada == 'pausada':
+                tempo_ate_pausa = controle.hora_pausa - controle.hora_inicio
+                horas_atuais = float(Decimal(tempo_ate_pausa.total_seconds() / 3600))
+            else:
+                tempo_total = agora - controle.hora_inicio
+                if controle.hora_pausa and controle.hora_retorno:
+                    tempo_pausa = controle.hora_retorno - controle.hora_pausa
+                    tempo_total -= tempo_pausa
+                elif controle.hora_pausa and not controle.hora_retorno:
+                    # Está pausado, calcular só até a pausa
+                    tempo_total = controle.hora_pausa - controle.hora_inicio
+                horas_atuais = float(Decimal(tempo_total.total_seconds() / 3600))
+        elif controle.status_jornada == 'finalizada':
+            horas_atuais = float(controle.total_horas)
+        
         return JsonResponse({
             'status': controle.status_jornada,
             'alerta_8h': controle.alerta_8_horas,
-            'total_horas': float(controle.total_horas),
+            'total_horas': horas_atuais,
             'hora_inicio': controle.hora_inicio.strftime('%H:%M') if controle.hora_inicio else None,
             'hora_pausa': controle.hora_pausa.strftime('%H:%M') if controle.hora_pausa else None,
             'hora_retorno': controle.hora_retorno.strftime('%H:%M') if controle.hora_retorno else None,

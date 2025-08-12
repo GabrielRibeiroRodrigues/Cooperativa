@@ -280,9 +280,14 @@ class ControleJornada(models.Model):
                 if self.hora_pausa and self.hora_retorno:
                     tempo_pausa = self.hora_retorno - self.hora_pausa
                     tempo_total -= tempo_pausa
+                elif self.hora_pausa and not self.hora_retorno:
+                    # Está pausado, calcular só até a pausa
+                    tempo_total = self.hora_pausa - self.hora_inicio
                 horas_trabalhadas = Decimal(tempo_total.total_seconds() / 3600)
             
             return horas_trabalhadas >= 8
+        elif self.status_jornada == 'finalizada':
+            return self.total_horas >= 8
         return False
     
     class Meta:
