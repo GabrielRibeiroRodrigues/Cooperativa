@@ -1,0 +1,123 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Registro - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center bg-success text-white">
+                <h4><i class="fas fa-user-plus me-2"></i>Cadastrar-se</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        <div class="form-text">Obrigatório. 150 caracteres ou menos. Apenas letras, números e @/./+/-/_.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                        {{ form.email }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
+                        {{ form.telefone }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.role.label }}</label>
+                        <div>
+                            {% for choice in form.role %}
+                                <div class="form-check">
+                                    {{ choice.tag }}
+                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="valor-diario-field" style="display: none;">
+                        <label for="{{ form.valor_diario.id_for_label }}" class="form-label">{{ form.valor_diario.label }}</label>
+                        {{ form.valor_diario }}
+                        <div class="form-text">{{ form.valor_diario.help_text }}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                            {{ form.password1 }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                            {{ form.password2 }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-user-plus me-2"></i>Cadastrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Já tem uma conta? 
+                    <a href="{% url 'login' %}" class="text-success">Entre aqui</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleRadios = document.querySelectorAll('input[name="role"]');
+    const valorDiarioField = document.getElementById('valor-diario-field');
+    const valorDiarioInput = document.getElementById('{{ form.valor_diario.id_for_label }}');
+    
+    function toggleValorDiario() {
+        const selectedRole = document.querySelector('input[name="role"]:checked');
+        if (selectedRole && selectedRole.value === 'trabalhador') {
+            valorDiarioField.style.display = 'block';
+            valorDiarioInput.required = true;
+        } else {
+            valorDiarioField.style.display = 'none';
+            valorDiarioInput.required = false;
+            valorDiarioInput.value = '';
+        }
+    }
+    
+    roleRadios.forEach(radio => {
+        radio.addEventListener('change', toggleValorDiario);
+    });
+    
+    // Verificar estado inicial
+    toggleValorDiario();
+});
+</script>
+{% endblock %}

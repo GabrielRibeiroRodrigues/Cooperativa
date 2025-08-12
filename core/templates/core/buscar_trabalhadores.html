@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Buscar Trabalhadores - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-search me-2"></i>Buscar Trabalhadores</h1>
+        <p class="text-muted">Encontre trabalhadores qualificados para seu trabalho rural</p>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="q" class="form-label">Nome do trabalhador</label>
+                        <input type="text" class="form-control" id="q" name="q" value="{{ query }}" placeholder="Digite o nome...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="valor_min" class="form-label">Valor mínimo (R$)</label>
+                        <input type="number" class="form-control" id="valor_min" name="valor_min" value="{{ valor_min }}" step="0.01">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="valor_max" class="form-label">Valor máximo (R$)</label>
+                        <input type="number" class="form-control" id="valor_max" name="valor_max" value="{{ valor_max }}" step="0.01">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-search me-2"></i>Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if trabalhadores %}
+        {% for trabalhador in trabalhadores %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 trabalhador-card" onclick="window.location.href='{% url 'detalhes_trabalhador' trabalhador.id %}'">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-4x text-success"></i>
+                    </div>
+                    <h5 class="card-title text-center">
+                        {{ trabalhador.get_full_name|default:trabalhador.username }}
+                    </h5>
+                    <div class="perfil-rating text-center mb-3">
+                        {% if trabalhador.avaliacao_media > 0 %}
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= trabalhador.avaliacao_media %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2 text-muted">({{ trabalhador.avaliacao_media|floatformat:1 }})</span>
+                        {% else %}
+                            <span class="text-muted">Sem avaliações ainda</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-center">
+                        <div class="mb-2">
+                            <i class="fas fa-money-bill text-success me-2"></i>
+                            <strong>R$ {{ trabalhador.valor_diario|floatformat:2 }}/dia</strong>
+                        </div>
+                        {% if trabalhador.telefone %}
+                        <div class="mb-2">
+                            <i class="fas fa-phone text-info me-2"></i>
+                            <small>{{ trabalhador.telefone }}</small>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clipboard-list me-1"></i>
+                                {{ trabalhador.servicos_trabalhados.count }} trabalhos realizados
+                            </small>
+                        </div>
+                        <a href="{% url 'detalhes_trabalhador' trabalhador.id %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-eye me-2"></i>Ver Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Paginação -->
+        {% if trabalhadores.has_other_pages %}
+        <div class="col-12">
+            <nav aria-label="Navegação de páginas">
+                <ul class="pagination justify-content-center">
+                    {% if trabalhadores.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ trabalhadores.previous_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">Anterior</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in trabalhadores.paginator.page_range %}
+                        {% if trabalhadores.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > trabalhadores.number|add:'-3' and num < trabalhadores.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if trabalhadores.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ trabalhadores.next_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">Próxima</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhum trabalhador encontrado</h5>
+                <p class="text-muted">Tente ajustar os filtros de busca</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

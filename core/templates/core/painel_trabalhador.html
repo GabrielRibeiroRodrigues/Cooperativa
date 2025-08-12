@@ -1,0 +1,228 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Painel do Trabalhador - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="fas fa-tools me-2"></i>Painel do Trabalhador</h1>
+        <p class="text-muted">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
+    </div>
+</div>
+
+{% if servico_ativo %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-play-circle me-2"></i>Serviço Ativo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>{{ servico_ativo.descricao|truncatechars:100 }}</h6>
+                        <p class="mb-1"><strong>Contratante:</strong> {{ servico_ativo.contratante.get_full_name|default:servico_ativo.contratante.username }}</p>
+                        <p class="mb-1"><strong>Data:</strong> {{ servico_ativo.data_servico|date:"d/m/Y" }}</p>
+                        <p class="mb-0"><strong>Valor:</strong> R$ {{ servico_ativo.valor_acordado|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'detalhes_servico' servico_ativo.id %}" class="btn btn-outline-success">
+                            <i class="fas fa-eye me-2"></i>Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+                
+                {% if jornada_ativa %}
+                <hr>
+                <div class="jornada-controls">
+                    <div class="jornada-status {{ jornada_ativa.status_jornada }}">
+                        <i class="fas fa-clock me-2"></i>
+                        {% if jornada_ativa.status_jornada == 'nao_iniciada' %}
+                            Jornada não iniciada
+                        {% elif jornada_ativa.status_jornada == 'em_andamento' %}
+                            Jornada em andamento
+                        {% elif jornada_ativa.status_jornada == 'pausada' %}
+                            Jornada pausada (almoço)
+                        {% elif jornada_ativa.status_jornada == 'finalizada' %}
+                            Jornada finalizada
+                        {% endif %}
+                    </div>
+                    
+                    {% if jornada_ativa.alerta_8_horas and jornada_ativa.status_jornada != 'finalizada' %}
+                    <div class="alerta-8h">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Atenção:</strong> Você já trabalhou 8 horas hoje!
+                    </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if jornada_ativa.hora_inicio %}
+                                <p><strong>Início:</strong> {{ jornada_ativa.hora_inicio|time:"H:i" }}</p>
+                            {% endif %}
+                            {% if jornada_ativa.hora_pausa %}
+                                <p><strong>Pausa:</strong> {{ jornada_ativa.hora_pausa|time:"H:i" }}</p>
+                            {% endif %}
+                            {% if jornada_ativa.hora_retorno %}
+                                <p><strong>Retorno:</strong> {{ jornada_ativa.hora_retorno|time:"H:i" }}</p>
+                            {% endif %}
+                            {% if jornada_ativa.hora_fim %}
+                                <p><strong>Fim:</strong> {{ jornada_ativa.hora_fim|time:"H:i" }}</p>
+                                <p><strong>Total:</strong> {{ jornada_ativa.total_horas }}h</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="btn-group d-flex" role="group">
+                                {% if jornada_ativa.status_jornada == 'nao_iniciada' %}
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'iniciar' %}" class="btn btn-success">
+                                        <i class="fas fa-play me-1"></i>Iniciar
+                                    </a>
+                                {% elif jornada_ativa.status_jornada == 'em_andamento' %}
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'pausar' %}" class="btn btn-warning">
+                                        <i class="fas fa-pause me-1"></i>Pausar
+                                    </a>
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'finalizar' %}" class="btn btn-danger">
+                                        <i class="fas fa-stop me-1"></i>Finalizar
+                                    </a>
+                                {% elif jornada_ativa.status_jornada == 'pausada' %}
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'retomar' %}" class="btn btn-info">
+                                        <i class="fas fa-play me-1"></i>Retomar
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                <h5>{{ total_servicos }}</h5>
+                <p class="mb-0">Total de Serviços</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-warning text-dark">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h5>{{ servicos_pendentes }}</h5>
+                <p class="mb-0">Pendentes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <i class="fas fa-check fa-2x mb-2"></i>
+                <h5>{{ servicos_concluidos }}</h5>
+                <p class="mb-0">Concluídos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <i class="fas fa-star fa-2x mb-2"></i>
+                <h5>{{ user.avaliacao_media|floatformat:1 }}</h5>
+                <p class="mb-0">Avaliação Média</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Suas Propostas Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if servicos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Contratante</th>
+                                    <th>Descrição</th>
+                                    <th>Data</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for servico in servicos %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-2x text-secondary me-2"></i>
+                                            <div>
+                                                <strong>{{ servico.contratante.get_full_name|default:servico.contratante.username }}</strong>
+                                                <br><small class="text-muted">{{ servico.contratante.telefone|default:"Sem telefone" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 200px;">
+                                            {{ servico.descricao|truncatechars:80 }}
+                                        </div>
+                                    </td>
+                                    <td>{{ servico.data_servico|date:"d/m/Y" }}</td>
+                                    <td>R$ {{ servico.valor_acordado|floatformat:2 }}</td>
+                                    <td>
+                                        {% if servico.status == 'pendente' %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% elif servico.status == 'aceito' %}
+                                            <span class="badge bg-info">Aceito</span>
+                                        {% elif servico.status == 'concluido' %}
+                                            <span class="badge bg-success">Concluído</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Cancelado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'detalhes_servico' servico.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if servico.status == 'pendente' %}
+                                            <a href="{% url 'aceitar_servico' servico.id %}" class="btn btn-sm btn-success me-1" onclick="return confirm('Deseja aceitar este serviço?')">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            <a href="{% url 'recusar_servico' servico.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Deseja recusar este serviço?')">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhuma proposta de trabalho ainda</h5>
+                        <p class="text-muted">Complete seu perfil para receber mais propostas!</p>
+                        <a href="{% url 'perfil' %}" class="btn btn-success">
+                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

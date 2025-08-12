@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Cooperativa Rural - Conectando Trabalhadores e Contratantes{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-success text-white py-5 mb-5" style="margin-left: -15px; margin-right: -15px;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-seedling me-3"></i>Cooperativa Rural
+                </h1>
+                <p class="lead mb-4">
+                    Conectamos trabalhadores rurais qualificados com contratantes que precisam de serviços no campo.
+                    Uma plataforma segura e confiável para o trabalho rural.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4 me-md-2">
+                        <i class="fas fa-user-plus me-2"></i>Cadastrar-se
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-tractor fa-10x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-users fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Para Contratantes</h5>
+                    <p class="card-text">
+                        Encontre trabalhadores rurais qualificados e confiáveis. 
+                        Veja avaliações, compare preços e contrate com segurança.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Busca por região e especialidade</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Sistema de avaliações</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Chat direto com o trabalhador</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Controle de jornada</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-tools fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Para Trabalhadores</h5>
+                    <p class="card-text">
+                        Encontre oportunidades de trabalho no campo. 
+                        Defina seu valor diário e construa sua reputação.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Receba propostas de trabalho</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Controle sua agenda</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Registre suas horas de trabalho</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Receba avaliações</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-shield-alt fa-3x"></i>
+                    </div>
+                    <h5 class="card-title">Segurança e Confiança</h5>
+                    <p class="card-text">
+                        Plataforma segura com sistema de avaliações mútuas 
+                        e controle transparente de jornada de trabalho.
+                    </p>
+                    <ul class="list-unstyled text-start">
+                        <li><i class="fas fa-check text-success me-2"></i>Perfis verificados</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Histórico de trabalhos</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Sistema de chat interno</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Controle de horas automatizado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h2 class="mb-4">Como funciona?</h2>
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-user-plus fa-2x"></i>
+                    </div>
+                    <h6>1. Cadastre-se</h6>
+                    <p class="small text-muted">Crie seu perfil como contratante ou trabalhador</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                    <h6>2. Busque/Receba</h6>
+                    <p class="small text-muted">Encontre trabalhos ou receba propostas</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-handshake fa-2x"></i>
+                    </div>
+                    <h6>3. Contrate</h6>
+                    <p class="small text-muted">Aceite a proposta e inicie o trabalho</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                    <h6>4. Avalie</h6>
+                    <p class="small text-muted">Deixe sua avaliação e construa reputação</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

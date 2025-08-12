@@ -1,0 +1,132 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Painel do Contratante - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-briefcase me-2"></i>Painel do Contratante</h1>
+            <a href="{% url 'buscar_trabalhadores' %}" class="btn btn-success">
+                <i class="fas fa-search me-2"></i>Buscar Trabalhadores
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                <h5>{{ total_servicos }}</h5>
+                <p class="mb-0">Total de Serviços</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-warning text-dark">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h5>{{ servicos_pendentes }}</h5>
+                <p class="mb-0">Pendentes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <i class="fas fa-play fa-2x mb-2"></i>
+                <h5>{{ servicos_aceitos }}</h5>
+                <p class="mb-0">Em Andamento</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <i class="fas fa-check fa-2x mb-2"></i>
+                <h5>{{ user.servicos_contratados.filter:status='concluido'|length }}</h5>
+                <p class="mb-0">Concluídos</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Seus Serviços Recentes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if servicos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Trabalhador</th>
+                                    <th>Descrição</th>
+                                    <th>Data</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for servico in servicos %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-2x text-secondary me-2"></i>
+                                            <div>
+                                                <strong>{{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}</strong>
+                                                <br><small class="text-muted">{{ servico.trabalhador.telefone|default:"Sem telefone" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 200px;">
+                                            {{ servico.descricao|truncatechars:80 }}
+                                        </div>
+                                    </td>
+                                    <td>{{ servico.data_servico|date:"d/m/Y" }}</td>
+                                    <td>R$ {{ servico.valor_acordado|floatformat:2 }}</td>
+                                    <td>
+                                        {% if servico.status == 'pendente' %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% elif servico.status == 'aceito' %}
+                                            <span class="badge bg-info">Aceito</span>
+                                        {% elif servico.status == 'concluido' %}
+                                            <span class="badge bg-success">Concluído</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Cancelado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'detalhes_servico' servico.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum serviço contratado ainda</h5>
+                        <p class="text-muted">Que tal buscar por trabalhadores disponíveis?</p>
+                        <a href="{% url 'buscar_trabalhadores' %}" class="btn btn-success">
+                            <i class="fas fa-search me-2"></i>Buscar Trabalhadores
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
