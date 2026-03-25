@@ -42,10 +42,13 @@ class RegistroForm(UserCreationForm):
         cleaned_data = super().clean()
         role = cleaned_data.get('role')
         valor_diario = cleaned_data.get('valor_diario')
-        
+
         if role == 'trabalhador' and not valor_diario:
             raise forms.ValidationError('Trabalhadores devem informar o valor diário.')
-        
+
+        if role == 'contratante' and not valor_diario:
+            cleaned_data['valor_diario'] = Decimal('0.00')
+
         return cleaned_data
 
 

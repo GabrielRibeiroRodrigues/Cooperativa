@@ -172,11 +172,9 @@ class Avaliacao(models.Model):
             self.avaliado = self.servico.trabalhador
         else:
             self.avaliado = self.servico.contratante
-        
+
         super().save(*args, **kwargs)
-        
-        # Recalcula a média do avaliado
-        self.avaliado.recalcular_avaliacao_media()
+        # Recálculo da média é feito pelo signal post_save em signals.py
     
     class Meta:
         verbose_name = 'Avaliação'

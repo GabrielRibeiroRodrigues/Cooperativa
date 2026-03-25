@@ -91,6 +91,7 @@ def painel_contratante(request):
         'total_servicos': request.user.servicos_contratados.count(),
         'servicos_pendentes': request.user.servicos_contratados.filter(status='pendente').count(),
         'servicos_aceitos': request.user.servicos_contratados.filter(status='aceito').count(),
+        'servicos_concluidos': request.user.servicos_contratados.filter(status='concluido').count(),
     }
     return render(request, 'core/painel_contratante.html', context)
 

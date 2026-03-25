@@ -114,6 +114,9 @@ USE_TZ = True
 # Custom User Model
 AUTH_USER_MODEL = 'core.User'
 
+# Redirect para login customizado
+LOGIN_URL = '/login/'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/

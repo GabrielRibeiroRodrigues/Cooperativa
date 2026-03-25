@@ -25,6 +25,6 @@ urlpatterns = [
     path('servico/<int:servico_id>/recusar/', views.recusar_servico, name='recusar_servico'),
     
     # Controle de jornada
-    path('jornada/<int:servico_id>/<str:acao>/', views.controle_jornada, name='controle_jornada'),
     path('jornada/<int:servico_id>/status/', views.status_jornada_ajax, name='status_jornada_ajax'),
+    path('jornada/<int:servico_id>/<str:acao>/', views.controle_jornada, name='controle_jornada'),
 ]
