@@ -85,3 +85,33 @@
     </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pega o ID gerado pelo Django para o campo de telefone
+        const telefoneInput = document.getElementById('{{ form.telefone.id_for_label }}');
+        
+        if (telefoneInput) {
+            telefoneInput.addEventListener('input', function (e) {
+                let value = e.target.value;
+                
+                // Remove tudo o que não for número
+                value = value.replace(/\D/g, '');
+                
+                // Limita a 11 números (DDD + 9 dígitos)
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+                
+                // Aplica a máscara: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                
+                // Atualiza o valor no input
+                e.target.value = value;
+            });
+        }
+    });
+</script>
+{% endblock %}

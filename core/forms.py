@@ -44,15 +44,26 @@ class RegistroForm(UserCreationForm):
     def clean_username(self):
         username = self.cleaned_data.get('username')
 
-        # Validação de tamanho mínimo
         if len(username) < 4:
             raise forms.ValidationError("O nome de usuário deve ter pelo menos 4 caracteres.")
 
-        # Validação de caracteres (permite apenas letras, números e underline)
         if not re.match(r'^[a-zA-Z0-9_]+$', username):
             raise forms.ValidationError("O nome de usuário deve conter apenas letras, números e sublinhados (_), sem espaços.")
 
         return username
+    
+    def clean_telefone(self):
+        telefone = self.cleaned_data.get('telefone')
+
+        if telefone:
+            padrao = r'^\(\d{2}\) \d{4,5}-\d{4}$'
+            
+            if not re.match(padrao, telefone):
+                raise forms.ValidationError("Digite um telefone válido no formato (XX) XXXXX-XXXX.")
+            
+            telefone = re.sub(r'\D', '', telefone)
+
+        return telefone
     
     def clean(self):
         cleaned_data = super().clean()
