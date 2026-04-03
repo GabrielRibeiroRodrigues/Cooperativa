@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -27,16 +28,31 @@ class RegistroForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['username'].help_text = 'Obrigatório. Mínimo de 4 caracteres. Apenas letras, números e sublinhados (_).'
         # Adicionar classes CSS do Bootstrap
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
         
         # Radio buttons para role
         self.fields['role'].widget.attrs['class'] = 'form-check-input'
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+
+        # Validação de tamanho mínimo
+        if len(username) < 4:
+            raise forms.ValidationError("O nome de usuário deve ter pelo menos 4 caracteres.")
+
+        # Validação de caracteres (permite apenas letras, números e underline)
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError("O nome de usuário deve conter apenas letras, números e sublinhados (_), sem espaços.")
+
+        return username
     
     def clean(self):
         cleaned_data = super().clean()
@@ -44,7 +60,7 @@ class RegistroForm(UserCreationForm):
         valor_diario = cleaned_data.get('valor_diario')
 
         if role == 'trabalhador' and not valor_diario:
-            raise forms.ValidationError('Trabalhadores devem informar o valor diário.')
+            self.add_error('valor_diario', 'Trabalhadores devem informar o valor diário.')
 
         if role == 'contratante' and not valor_diario:
             cleaned_data['valor_diario'] = Decimal('0.00')
