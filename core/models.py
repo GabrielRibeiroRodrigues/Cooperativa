@@ -113,8 +113,15 @@ class Servico(models.Model):
     
     @property
     def pode_iniciar_jornada(self):
-        """Verifica se pode iniciar jornada de trabalho"""
-        return self.status == 'aceito'
+        """Verifica se pode iniciar jornada de trabalho (exige contrato assinado)"""
+        if self.status != 'aceito':
+            return False
+        
+        # O serviço só pode iniciar se houver um contrato e ele estiver 'vigente'
+        if hasattr(self, 'contrato_formal'):
+            return self.contrato_formal.status == 'vigente'
+        
+        return False
     
     @property
     def jornada_ativa(self):

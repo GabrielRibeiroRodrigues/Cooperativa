@@ -1,0 +1,142 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalhes do Contrato {{ contrato.numero }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Coluna Principal: Informações do Contrato -->
+    <div class="col-lg-8">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Contrato #{{ contrato.numero }}</h5>
+                {% if contrato.status == 'vigente' %}
+                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>VIGENTE</span>
+                {% elif contrato.status == 'aguardando_assinatura' %}
+                    <span class="badge bg-primary"><i class="fas fa-clock me-1"></i>AGUARDANDO ASSINATURA</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6 border-end">
+                        <h6 class="text-muted small text-uppercase">Contratante</h6>
+                        <p class="mb-1 fw-bold">{{ contrato.contratante.get_full_name }}</p>
+                        <p class="text-muted small">Email: {{ contrato.contratante.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted small text-uppercase">Trabalhador</h6>
+                        <p class="mb-1 fw-bold">{{ contrato.trabalhador.get_full_name }}</p>
+                        <p class="text-muted small">Valor Diário: R$ {{ contrato.trabalhador.valor_diario }}</p>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded mb-4">
+                    <h6 class="fw-bold mb-2">Objeto do Contrato</h6>
+                    <p class="mb-0">{{ contrato.descricao_servico }}</p>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <h6 class="text-muted small text-uppercase">Valor Total</h6>
+                        <p class="fw-bold">R$ {{ contrato.valor }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted small text-uppercase">Data de Início</h6>
+                        <p class="fw-bold">{{ contrato.data_inicio|date:"d/m/Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted small text-uppercase">Serviço de Risco?</h6>
+                        <p class="fw-bold">{% if contrato.e_servico_risco %}<span class="text-danger">Sim</span>{% else %}Não{% endif %}</p>
+                    </div>
+                </div>
+
+                {% if contrato.arquivo_pdf %}
+                <div class="d-grid gap-2">
+                    <a href="{{ contrato.arquivo_pdf.url }}" target="_blank" class="btn btn-outline-danger">
+                        <i class="fas fa-file-pdf me-2"></i>Visualizar PDF do Contrato Original
+                    </a>
+                </div>
+                {% else %}
+                <div class="alert alert-warning py-2 small">
+                    <i class="fas fa-exclamation-triangle me-2"></i>PDF ainda não gerado (aguarde Etapa 3).
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Coluna Lateral: Status das Assinaturas -->
+    <div class="col-lg-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0">Gestão de Assinaturas</h6>
+            </div>
+            <div class="card-body">
+                <!-- Assinatura do Contratante -->
+                <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                        {% if contrato.assinatura_contratante.assinado %}
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-2x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="mb-0 fw-bold">Contratante</p>
+                        <small class="text-muted">{{ contrato.contratante.get_full_name }}</small>
+                    </div>
+                </div>
+
+                <!-- Assinatura do Trabalhador -->
+                <div class="d-flex align-items-center mb-4">
+                    <div class="me-3">
+                        {% if contrato.assinatura_trabalhador.assinado %}
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle fa-2x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="mb-0 fw-bold">Trabalhador</p>
+                        <small class="text-muted">{{ contrato.trabalhador.get_full_name }}</small>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Área de Ação do Trabalhador -->
+                {% if user == contrato.trabalhador and contrato.status == 'aguardando_assinatura' %}
+                    <div class="alert alert-info small">
+                        <strong>Próximo Passo:</strong><br>
+                        1. Baixe o PDF acima.<br>
+                        2. Assine digitalmente via <strong>gov.br</strong>.<br>
+                        3. Envie o arquivo assinado aqui embaixo.
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Enviar PDF Assinado</label>
+                            {{ form_upload.arquivo_pdf_assinado }}
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-upload me-2"></i>Enviar Assinatura
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if contrato.arquivo_pdf_assinado %}
+                <div class="mt-3">
+                    <a href="{{ contrato.arquivo_pdf_assinado.url }}" target="_blank" class="btn btn-sm btn-success w-100">
+                        <i class="fas fa-download me-2"></i>Baixar Doc Assinado
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="{% url 'contratos:lista_contratos' %}" class="btn btn-link text-success w-100">
+            <i class="fas fa-arrow-left me-1"></i>Voltar para a Lista
+        </a>
+    </div>
+</div>
+{% endblock %}

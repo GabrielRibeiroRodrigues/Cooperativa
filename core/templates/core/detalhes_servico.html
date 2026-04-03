@@ -220,9 +220,19 @@ function atualizarStatusJornada() {
                 case 'nao_iniciada':
                     statusClass = 'nao-iniciada';
                     statusText = 'Jornada não iniciada';
-                    botoes = `<a href="{% url 'controle_jornada' servico.id 'iniciar' %}" class="btn btn-success">
-                        <i class="fas fa-play me-1"></i>Iniciar Jornada
-                    </a>`;
+                    if (data.contrato_pendente) {
+                        botoes = `
+                            <div class="alert alert-warning mb-0 small">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Atenção:</strong> Você precisa assinar e enviar o contrato para liberar o início da jornada.
+                                <br><a href="{% url 'contratos:lista_contratos' %}" class="btn btn-sm btn-outline-warning mt-2">Ir para Meus Contratos</a>
+                            </div>
+                        `;
+                    } else {
+                        botoes = `<a href="{% url 'controle_jornada' servico.id 'iniciar' %}" class="btn btn-success">
+                            <i class="fas fa-play me-1"></i>Iniciar Jornada
+                        </a>`;
+                    }
                     break;
                 case 'em_andamento':
                     statusClass = 'em-andamento';
