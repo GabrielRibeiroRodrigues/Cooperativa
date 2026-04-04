@@ -23,18 +23,42 @@ def home(request):
     return render(request, 'core/home.html')
 
 
-def registro_view(request):
-    """Registro de usuário"""
+def registro_contratante_view(request):
+    """Registro específico para Contratante"""
     if request.method == 'POST':
-        form = RegistroForm(request.POST)
+        # Faz uma cópia mutável do POST e força a role
+        data = request.POST.copy()
+        data['role'] = 'contratante'
+        
+        form = RegistroForm(data)
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Conta criada para {username}! Você já pode fazer login.')
+            messages.success(request, f'Conta de contratante criada para {username}! Você já pode fazer login.')
             return redirect('login')
     else:
-        form = RegistroForm()
-    return render(request, 'core/registro.html', {'form': form})
+        form = RegistroForm(initial={'role': 'contratante'})
+        
+    return render(request, 'core/cadastro_contratante.html', {'form': form})
+
+
+def registro_trabalhador_view(request):
+    """Registro específico para Trabalhador"""
+    if request.method == 'POST':
+        # Faz uma cópia mutável do POST e força a role
+        data = request.POST.copy()
+        data['role'] = 'trabalhador'
+        
+        form = RegistroForm(data)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Conta de trabalhador criada para {username}! Você já pode fazer login.')
+            return redirect('login')
+    else:
+        form = RegistroForm(initial={'role': 'trabalhador'})
+        
+    return render(request, 'core/cadastro_trabalhador.html', {'form': form})
 
 
 def login_view(request):

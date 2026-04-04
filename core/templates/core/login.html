@@ -27,11 +27,16 @@
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-center">
-                <p class="mb-0">
-                    Não tem uma conta? 
-                    <a href="{% url 'registro' %}" class="text-success">Registre-se aqui</a>
-                </p>
+            <div class="card-footer text-center py-3">
+                <p class="mb-2 text-muted">Não tem uma conta? Registre-se como:</p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="{% url 'registro_contratante' %}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-briefcase me-1"></i>Contratante
+                    </a>
+                    <a href="{% url 'registro_trabalhador' %}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-tractor me-1"></i>Trabalhador
+                    </a>
+                </div>
             </div>
         </div>
     </div>

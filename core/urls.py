@@ -8,7 +8,10 @@ urlpatterns = [
     # Autenticação
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('registro/', views.registro_view, name='registro'),
+    
+    path('registro/contratante/', views.registro_contratante_view, name='registro_contratante'),
+    path('registro/trabalhador/', views.registro_trabalhador_view, name='registro_trabalhador'),
+
     path('perfil/', views.perfil_view, name='perfil'),
     
     # Painéis

@@ -1,3 +1,4 @@
+import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -24,19 +25,66 @@ class RegistroForm(UserCreationForm):
         help_text='Apenas para trabalhadores',
         validators=[MinValueValidator(Decimal('0.00'))]
     )
+
+    cpf = forms.CharField(max_length=14, required=True, label='CPF')
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario', 'password1', 'password2')
+        fields = ('username', 'email', 'cpf', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.fields['username'].help_text = 'Obrigatório. Mínimo de 4 caracteres. Apenas letras, números e sublinhados (_).'
         # Adicionar classes CSS do Bootstrap
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
         
         # Radio buttons para role
         self.fields['role'].widget.attrs['class'] = 'form-check-input'
+
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf')
+        
+        if cpf:
+            cpf_numeros = re.sub(r'\D', '', cpf)
+            
+            if len(cpf_numeros) != 11 or len(set(cpf_numeros)) == 1:
+                raise forms.ValidationError("CPF inválido. Verifique os números digitados.")
+            
+            for i in range(9, 11):
+                soma = sum((int(cpf_numeros[num]) * ((i + 1) - num) for num in range(0, i)))
+                digito = ((soma * 10) % 11) % 10
+                if digito != int(cpf_numeros[i]):
+                    raise forms.ValidationError("CPF inválido. Dígito verificador incorreto.")
+            
+            return cpf
+        
+        return cpf
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+
+        if len(username) < 4:
+            raise forms.ValidationError("O nome de usuário deve ter pelo menos 4 caracteres.")
+
+        if not re.match(r'^[a-zA-Z0-9_]+$', username):
+            raise forms.ValidationError("O nome de usuário deve conter apenas letras, números e sublinhados (_), sem espaços.")
+
+        return username
+    
+    def clean_telefone(self):
+        telefone = self.cleaned_data.get('telefone')
+
+        if telefone:
+            padrao = r'^\(\d{2}\) \d{4,5}-\d{4}$'
+            
+            if not re.match(padrao, telefone):
+                raise forms.ValidationError("Digite um telefone válido no formato (XX) XXXXX-XXXX.")
+            
+            telefone = re.sub(r'\D', '', telefone)
+
+        return telefone
     
     def clean(self):
         cleaned_data = super().clean()
@@ -44,7 +92,7 @@ class RegistroForm(UserCreationForm):
         valor_diario = cleaned_data.get('valor_diario')
 
         if role == 'trabalhador' and not valor_diario:
-            raise forms.ValidationError('Trabalhadores devem informar o valor diário.')
+            self.add_error('valor_diario', 'Trabalhadores devem informar o valor diário.')
 
         if role == 'contratante' and not valor_diario:
             cleaned_data['valor_diario'] = Decimal('0.00')
@@ -55,10 +103,11 @@ class RegistroForm(UserCreationForm):
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'telefone', 'valor_diario']
+        fields = ['first_name', 'last_name', 'cpf', 'email', 'telefone', 'valor_diario']
         labels = {
             'first_name': 'Nome',
             'last_name': 'Sobrenome',
+            'cpf': 'CPF',
             'email': 'Email',
             'telefone': 'Telefone',
             'valor_diario': 'Valor diário (R$)',

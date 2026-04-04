@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Registro de Trabalhador - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center bg-success text-white">
+                <h4><i class="fas fa-tractor me-2"></i>Cadastro de Trabalhador</h4>
+                <p class="mb-0 small">Ofereça seus serviços e encontre oportunidades</p>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        <div class="form-text">{{ form.username.help_text }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                        {{ form.email }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
+                        {{ form.telefone }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.cpf.id_for_label }}" class="form-label">{{ form.cpf.label }}</label>
+                        {{ form.cpf }}
+                        {% if form.cpf.errors %}
+                            <div class="form-text text-danger">{{ form.cpf.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3 bg-light p-3 rounded border">
+                        <label for="{{ form.valor_diario.id_for_label }}" class="form-label text-success fw-bold">
+                            <i class="fas fa-money-bill-wave me-1"></i>{{ form.valor_diario.label }}
+                        </label>
+                        {{ form.valor_diario }}
+                        <div class="form-text">{{ form.valor_diario.help_text }}</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+                            {{ form.password1 }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                            {{ form.password2 }}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Finalizar Cadastro
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-2">
+                    Já tem uma conta? <a href="{% url 'login' %}" class="text-success">Entre aqui</a>
+                </p>
+                <p class="mb-0 small">
+                    Precisa contratar serviços? <a href="{% url 'registro_contratante' %}" class="text-success">Cadastre-se aqui</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const telefoneInput = document.getElementById('{{ form.telefone.id_for_label }}');
+        
+        if (telefoneInput) {
+            telefoneInput.addEventListener('input', function (e) {
+                let value = e.target.value;
+                
+                value = value.replace(/\D/g, '');
+                
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+                
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                
+                e.target.value = value;
+            });
+        }
+
+        const cpfInput = document.getElementById('{{ form.cpf.id_for_label }}');
+        
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value;
+                
+                value = value.replace(/\D/g, '');
+                
+                if (value.length > 11) {
+                    value = value.substring(0, 11);
+                }
+                
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                
+                e.target.value = value;
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -14,11 +14,17 @@
                     Conectamos trabalhadores rurais qualificados com contratantes que precisam de serviços no campo.
                     Uma plataforma segura e confiável para o trabalho rural.
                 </p>
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-                    <a href="{% url 'registro' %}" class="btn btn-light btn-lg px-4 me-md-2">
-                        <i class="fas fa-user-plus me-2"></i>Cadastrar-se
-                    </a>
-                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start flex-wrap">
+                    <div class="dropdown me-md-2 mb-2">
+                        <button class="btn btn-light btn-lg px-4 dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-plus me-2"></i>Cadastrar-se
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="{% url 'registro_contratante' %}">Como Contratante</a></li>
+                            <li><a class="dropdown-item" href="{% url 'registro_trabalhador' %}">Como Trabalhador</a></li>
+                        </ul>
+                    </div>
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4 mb-2">
                         <i class="fas fa-sign-in-alt me-2"></i>Entrar
                     </a>
                 </div>
