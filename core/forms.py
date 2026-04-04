@@ -25,10 +25,12 @@ class RegistroForm(UserCreationForm):
         help_text='Apenas para trabalhadores',
         validators=[MinValueValidator(Decimal('0.00'))]
     )
+
+    cpf = forms.CharField(max_length=14, required=True, label='CPF')
     
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario')
+        fields = ('username', 'email', 'cpf', 'first_name', 'last_name', 'telefone', 'role', 'valor_diario')
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,6 +42,25 @@ class RegistroForm(UserCreationForm):
         
         # Radio buttons para role
         self.fields['role'].widget.attrs['class'] = 'form-check-input'
+
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf')
+        
+        if cpf:
+            cpf_numeros = re.sub(r'\D', '', cpf)
+            
+            if len(cpf_numeros) != 11 or len(set(cpf_numeros)) == 1:
+                raise forms.ValidationError("CPF inválido. Verifique os números digitados.")
+            
+            for i in range(9, 11):
+                soma = sum((int(cpf_numeros[num]) * ((i + 1) - num) for num in range(0, i)))
+                digito = ((soma * 10) % 11) % 10
+                if digito != int(cpf_numeros[i]):
+                    raise forms.ValidationError("CPF inválido. Dígito verificador incorreto.")
+            
+            return cpf
+        
+        return cpf
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
@@ -82,10 +103,11 @@ class RegistroForm(UserCreationForm):
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'telefone', 'valor_diario']
+        fields = ['first_name', 'last_name', 'cpf', 'email', 'telefone', 'valor_diario']
         labels = {
             'first_name': 'Nome',
             'last_name': 'Sobrenome',
+            'cpf': 'CPF',
             'email': 'Email',
             'telefone': 'Telefone',
             'valor_diario': 'Valor diário (R$)',

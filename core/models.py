@@ -40,6 +40,14 @@ class User(AbstractUser):
             MaxValueValidator(Decimal('5.00'))
         ]
     )
+
+    cpf = models.CharField(
+        max_length=14, 
+        unique=True,
+        null=True,
+        blank=False,
+        verbose_name='CPF'
+    )
     
     def __str__(self):
         return f"{self.get_full_name() or self.username} ({self.get_role_display()})"
