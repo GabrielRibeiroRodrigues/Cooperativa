@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Meu Perfil - Cooperativa Rural{% endblock %}
+{% block title %}Meu Perfil (Trabalhador) - Cooperativa Rural{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-header bg-success text-white">
                 <h4 class="mb-0">
-                    <i class="fas fa-user-edit me-2"></i>Meu Perfil
+                    <i class="fas fa-tractor me-2"></i>Meu Perfil - Trabalhador
                 </h4>
             </div>
             <div class="card-body">
@@ -37,6 +37,17 @@
                     </div>
                     
                     <div class="mb-3">
+                        <label for="{{ form.cpf.id_for_label }}" class="form-label">{{ form.cpf.label }}</label>
+                        {{ form.cpf }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        <div class="form-text">{{ form.username.help_text }}</div>
+                    </div>
+                    
+                    <div class="mb-3">
                         <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
                         {{ form.email }}
                     </div>
@@ -46,24 +57,17 @@
                         {{ form.telefone }}
                     </div>
                     
-                    {% if user.role == 'trabalhador' %}
-                    <div class="mb-3">
-                        <label for="{{ form.valor_diario.id_for_label }}" class="form-label">{{ form.valor_diario.label }}</label>
+                    <div class="mb-3 bg-light p-3 rounded border">
+                        <label for="{{ form.valor_diario.id_for_label }}" class="form-label text-success fw-bold">
+                            <i class="fas fa-money-bill-wave me-1"></i>{{ form.valor_diario.label }}
+                        </label>
                         {{ form.valor_diario }}
                     </div>
-                    {% endif %}
                     
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tipo de usuário</label>
-                            <div class="form-control-plaintext">
-                                <span class="badge bg-success fs-6">{{ user.get_role_display }}</span>
-                            </div>
-                        </div>
-                        {% if user.role == 'trabalhador' %}
-                        <div class="col-md-6">
-                            <label class="form-label">Avaliação Média</label>
-                            <div class="form-control-plaintext">
+                    <div class="row mb-3 mt-4">
+                        <div class="col-md-12 text-center">
+                            <h6 class="text-muted">Sua Avaliação Média</h6>
+                            <div class="fs-4">
                                 {% if user.avaliacao_media > 0 %}
                                     {% for i in "12345" %}
                                         {% if forloop.counter <= user.avaliacao_media %}
@@ -72,13 +76,12 @@
                                             <i class="far fa-star text-muted"></i>
                                         {% endif %}
                                     {% endfor %}
-                                    <span class="ms-2">({{ user.avaliacao_media|floatformat:1 }})</span>
+                                    <span class="ms-2 fs-5">({{ user.avaliacao_media|floatformat:1 }})</span>
                                 {% else %}
-                                    <span class="text-muted">Sem avaliações ainda</span>
+                                    <span class="text-muted fs-6">Sem avaliações ainda</span>
                                 {% endif %}
                             </div>
                         </div>
-                        {% endif %}
                     </div>
                     
                     <div class="d-grid">
@@ -90,16 +93,16 @@
             </div>
         </div>
         
-        {% if user.role == 'trabalhador' and avaliacoes %}
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">
+        {% if avaliacoes %}
+        <div class="card mt-4 mb-5">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 text-success">
                     <i class="fas fa-star me-2"></i>Últimas Avaliações Recebidas
                 </h5>
             </div>
             <div class="card-body">
                 {% for avaliacao in avaliacoes %}
-                    <div class="mb-3 p-3 bg-light rounded">
+                    <div class="mb-3 p-3 bg-light rounded border-start border-4 border-warning">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <div class="rating mb-2">
@@ -112,9 +115,10 @@
                                     {% endfor %}
                                 </div>
                                 {% if avaliacao.comentario %}
-                                    <p class="mb-1">{{ avaliacao.comentario }}</p>
+                                    <p class="mb-2">"{{ avaliacao.comentario }}"</p>
                                 {% endif %}
                                 <small class="text-muted">
+                                    <i class="fas fa-user-circle me-1"></i>
                                     Por {{ avaliacao.avaliador.get_full_name|default:avaliacao.avaliador.username }}
                                     em {{ avaliacao.data_avaliacao|date:"d/m/Y" }}
                                 </small>
@@ -127,4 +131,39 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Máscara de Telefone
+        const telefoneInput = document.getElementById('{{ form.telefone.id_for_label }}');
+        if (telefoneInput) {
+            telefoneInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.substring(0, 11);
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = value;
+            });
+
+            if (telefoneInput.value) telefoneInput.dispatchEvent(new Event('input')); 
+        }
+
+        // Máscara de CPF
+        const cpfInput = document.getElementById('{{ form.cpf.id_for_label }}');
+        if (cpfInput) {
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.substring(0, 11);
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            });
+
+            if (cpfInput.value) cpfInput.dispatchEvent(new Event('input'));
+        }
+    });
+</script>
 {% endblock %}

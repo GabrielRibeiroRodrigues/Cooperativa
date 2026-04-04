@@ -99,7 +99,11 @@ def perfil_view(request):
         'form': form,
         'avaliacoes': request.user.avaliacoes_recebidas.all()[:5]
     }
-    return render(request, 'core/perfil.html', context)
+    
+    if request.user.role == 'contratante':
+        return render(request, 'core/perfil_contratante.html', context)
+    else:
+        return render(request, 'core/perfil_trabalhador.html', context)
 
 
 @login_required
