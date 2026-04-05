@@ -46,6 +46,9 @@ def home(request):
 
 def registro_contratante_view(request):
     """Registro específico para Contratante"""
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         # Faz uma cópia mutável do POST e força a role
         data = request.POST.copy()
@@ -65,6 +68,10 @@ def registro_contratante_view(request):
 
 def registro_trabalhador_view(request):
     """Registro específico para Trabalhador"""
+
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         # Faz uma cópia mutável do POST e força a role
         data = request.POST.copy()
@@ -84,6 +91,10 @@ def registro_trabalhador_view(request):
 
 def login_view(request):
     """Login de usuário"""
+
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
