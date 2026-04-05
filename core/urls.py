@@ -21,6 +21,26 @@ urlpatterns = [
     # Trabalhadores
     path('trabalhadores/', views.buscar_trabalhadores, name='buscar_trabalhadores'),
     path('trabalhador/<int:user_id>/', views.detalhes_trabalhador, name='detalhes_trabalhador'),
+
+    # Marketplace (core)
+    path('marketplace/tipos-servico/', views.lista_tipos_servico, name='lista_tipos_servico'),
+    path('marketplace/tipos-servico/novo/', views.criar_tipo_servico, name='criar_tipo_servico'),
+    path('marketplace/tipos-servico/<int:tipo_id>/editar/', views.editar_tipo_servico, name='editar_tipo_servico'),
+    path('marketplace/tipos-servico/<int:tipo_id>/excluir/', views.excluir_tipo_servico, name='excluir_tipo_servico'),
+    path('marketplace/trabalhadores/', views.lista_trabalhadores, name='lista_trabalhadores'),
+    path('marketplace/trabalhadores/<int:trabalhador_id>/', views.detalhe_trabalhador, name='detalhe_trabalhador'),
+    path('marketplace/meus-servicos/', views.meus_servicos, name='meus_servicos'),
+    path('marketplace/meus-servicos/<int:servico_id>/editar/', views.editar_meu_servico, name='editar_meu_servico'),
+    path('marketplace/meus-servicos/<int:servico_id>/excluir/', views.excluir_meu_servico, name='excluir_meu_servico'),
+    path('marketplace/meus-servicos/<int:servico_id>/toggle-disponivel/', views.toggle_disponivel_agora, name='toggle_disponivel_agora'),
+
+    # Demandas (core)
+    path('demandas/publicar/', views.publicar_demanda, name='publicar_demanda'),
+    path('demandas/abertas/', views.lista_demandas, name='lista_demandas'),
+    path('demandas/<int:demanda_id>/', views.detalhe_demanda, name='detalhe_demanda'),
+    path('demandas/inscricao/<int:inscricao_id>/<str:acao>/', views.atualizar_inscricao, name='atualizar_inscricao'),
+    path('demandas/minhas/', views.minhas_demandas, name='minhas_demandas'),
+    path('demandas/minhas-inscricoes/', views.minhas_inscricoes, name='minhas_inscricoes'),
     
     # Serviços
     path('servico/<int:servico_id>/', views.detalhes_servico, name='detalhes_servico'),

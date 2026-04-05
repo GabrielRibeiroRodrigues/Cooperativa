@@ -2,7 +2,16 @@ import re
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import User, Servico, Avaliacao, Mensagem
+from .models import (
+    User,
+    Servico,
+    Avaliacao,
+    Mensagem,
+    TipoServico,
+    TrabalhadorServico,
+    Demanda,
+    InscricaoDemanda,
+)
 from decimal import Decimal
 
 
@@ -224,3 +233,83 @@ class MensagemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['conteudo'].widget.attrs['class'] = 'form-control'
+
+
+class TipoServicoForm(forms.ModelForm):
+    class Meta:
+        model = TipoServico
+        fields = ['nome', 'descricao', 'e_servico_risco', 'ativo']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Aplicação de Agrotóxico'}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'e_servico_risco': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class TrabalhadorServicoForm(forms.ModelForm):
+    class Meta:
+        model = TrabalhadorServico
+        fields = ['tipo_servico', 'valor_diario', 'localizacao', 'descricao_experiencia']
+        widgets = {
+            'tipo_servico': forms.Select(attrs={'class': 'form-select'}),
+            'valor_diario': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00',
+            }),
+            'localizacao': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Ribeirão Preto, SP',
+            }),
+            'descricao_experiencia': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descreva sua experiência com este serviço...',
+            }),
+        }
+
+
+class DemandaForm(forms.ModelForm):
+    class Meta:
+        model = Demanda
+        fields = ['tipo_servico', 'titulo', 'descricao', 'data_servico', 'valor_oferecido', 'vagas', 'localizacao']
+        widgets = {
+            'tipo_servico': forms.Select(attrs={'class': 'form-select'}),
+            'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Colheita de café — 3 dias'}),
+            'descricao': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Descreva o serviço, requisitos e outras informações relevantes...',
+            }),
+            'data_servico': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'valor_oferecido': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00',
+            }),
+            'vagas': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'localizacao': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Fazenda Boa Esperança, Franca - SP',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tipo_servico'].queryset = TipoServico.objects.filter(ativo=True)
+
+
+class InscricaoDemandaForm(forms.ModelForm):
+    class Meta:
+        model = InscricaoDemanda
+        fields = ['mensagem']
+        widgets = {
+            'mensagem': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Apresente-se e explique por que você é a pessoa certa para este serviço...',
+            }),
+        }

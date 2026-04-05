@@ -28,14 +28,39 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'buscar_trabalhadores' %}">
+                                <a class="nav-link" href="{% url 'lista_trabalhadores' %}">
                                     <i class="fas fa-search me-1"></i>Buscar Trabalhadores
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'publicar_demanda' %}">
+                                    <i class="fas fa-bullhorn me-1"></i>Publicar Demanda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'minhas_demandas' %}">
+                                    <i class="fas fa-list-alt me-1"></i>Minhas Demandas
                                 </a>
                             </li>
                         {% else %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'painel_trabalhador' %}">
                                     <i class="fas fa-tools me-1"></i>Painel
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'meus_servicos' %}">
+                                    <i class="fas fa-tractor me-1"></i>Meus Serviços
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'lista_demandas' %}">
+                                    <i class="fas fa-clipboard-check me-1"></i>Demandas Abertas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'minhas_inscricoes' %}">
+                                    <i class="fas fa-paper-plane me-1"></i>Minhas Inscrições
                                 </a>
                             </li>
                         {% endif %}
