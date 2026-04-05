@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Minhas Inscrições{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-3">Minhas Inscrições</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="">Todos</option>
+                    <option value="pendente" {% if status_atual == 'pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="aceito" {% if status_atual == 'aceito' %}selected{% endif %}>Aceito</option>
+                    <option value="rejeitado" {% if status_atual == 'rejeitado' %}selected{% endif %}>Rejeitado</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-outline-success" type="submit">Filtrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3">
+    {% for inscricao in inscricoes %}
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">{{ inscricao.demanda.titulo }}</h2>
+                    <p class="mb-1"><strong>Tipo:</strong> {{ inscricao.demanda.tipo_servico.nome }}</p>
+                    <p class="mb-1"><strong>Contratante:</strong> {{ inscricao.demanda.contratante.get_full_name|default:inscricao.demanda.contratante.username }}</p>
+                    <p class="mb-1"><strong>Status:</strong> {{ inscricao.get_status_display }}</p>
+                    <p class="mb-0"><strong>Data da inscrição:</strong> {{ inscricao.data_inscricao|date:'d/m/Y H:i' }}</p>
+                </div>
+                <div class="card-footer bg-white border-0 pt-0">
+                    <a href="{% url 'detalhe_demanda' inscricao.demanda.id %}" class="btn btn-outline-primary w-100">Ver demanda</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning mb-0">Você ainda não possui inscrições em demandas.</div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

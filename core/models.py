@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from decimal import Decimal
@@ -335,3 +336,171 @@ class Mensagem(models.Model):
         verbose_name = 'Mensagem'
         verbose_name_plural = 'Mensagens'
         ordering = ['data_envio']
+
+
+class TipoServico(models.Model):
+    nome = models.CharField(max_length=100, verbose_name='Nome')
+    descricao = models.TextField(blank=True, verbose_name='Descrição')
+    e_servico_risco = models.BooleanField(
+        default=False,
+        verbose_name='Serviço de Risco',
+        help_text='Marque para serviços que envolvem agrotóxico, motosserra ou máquinas pesadas',
+    )
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        verbose_name = 'Tipo de Serviço'
+        verbose_name_plural = 'Tipos de Serviço'
+        ordering = ['nome']
+
+
+class TrabalhadorServico(models.Model):
+    trabalhador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='servicos_oferecidos',
+        limit_choices_to={'role': 'trabalhador'},
+        verbose_name='Trabalhador',
+    )
+    tipo_servico = models.ForeignKey(
+        TipoServico,
+        on_delete=models.CASCADE,
+        related_name='trabalhadores',
+        verbose_name='Tipo de Serviço',
+    )
+    valor_diario = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        verbose_name='Valor Diário (R$)',
+        validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    disponivel_agora = models.BooleanField(
+        default=False,
+        verbose_name='Disponível Agora',
+    )
+    localizacao = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Localização',
+        help_text='Cidade/Região onde atua',
+    )
+    descricao_experiencia = models.TextField(
+        blank=True,
+        verbose_name='Descrição da Experiência',
+    )
+    data_cadastro = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.trabalhador.get_full_name()} — {self.tipo_servico.nome}"
+
+    class Meta:
+        verbose_name = 'Trabalhador por Serviço'
+        verbose_name_plural = 'Trabalhadores por Serviço'
+        unique_together = ['trabalhador', 'tipo_servico']
+        ordering = ['-disponivel_agora', 'trabalhador__first_name']
+
+
+class Demanda(models.Model):
+    STATUS_CHOICES = [
+        ('aberta', 'Aberta'),
+        ('em_andamento', 'Em Andamento'),
+        ('encerrada', 'Encerrada'),
+        ('cancelada', 'Cancelada'),
+    ]
+
+    contratante = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='demandas_publicadas',
+        limit_choices_to={'role': 'contratante'},
+        verbose_name='Contratante',
+    )
+    tipo_servico = models.ForeignKey(
+        TipoServico,
+        on_delete=models.CASCADE,
+        related_name='demandas',
+        verbose_name='Tipo de Serviço',
+    )
+    titulo = models.CharField(max_length=200, verbose_name='Título')
+    descricao = models.TextField(verbose_name='Descrição')
+    data_servico = models.DateField(verbose_name='Data do Serviço')
+    valor_oferecido = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        verbose_name='Valor Oferecido (R$)',
+        validators=[MinValueValidator(Decimal('0.00'))],
+    )
+    vagas = models.PositiveIntegerField(default=1, verbose_name='Número de Vagas')
+    localizacao = models.CharField(max_length=200, blank=True, verbose_name='Localização')
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default='aberta',
+        verbose_name='Status',
+    )
+    data_criacao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.titulo} — {self.get_status_display()}"
+
+    @property
+    def vagas_disponiveis(self):
+        aceitos = self.inscricoes.filter(status='aceito').count()
+        return self.vagas - aceitos
+
+    @property
+    def esta_aberta(self):
+        return self.status == 'aberta' and self.vagas_disponiveis > 0
+
+    class Meta:
+        verbose_name = 'Demanda'
+        verbose_name_plural = 'Demandas'
+        ordering = ['-data_criacao']
+
+
+class InscricaoDemanda(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('aceito', 'Aceito'),
+        ('rejeitado', 'Rejeitado'),
+    ]
+
+    demanda = models.ForeignKey(
+        Demanda,
+        on_delete=models.CASCADE,
+        related_name='inscricoes',
+        verbose_name='Demanda',
+    )
+    trabalhador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='inscricoes_demandas',
+        limit_choices_to={'role': 'trabalhador'},
+        verbose_name='Trabalhador',
+    )
+    mensagem = models.TextField(
+        blank=True,
+        verbose_name='Mensagem de Apresentação',
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pendente',
+        verbose_name='Status',
+    )
+    data_inscricao = models.DateTimeField(auto_now_add=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.trabalhador.get_full_name()} → {self.demanda.titulo}"
+
+    class Meta:
+        verbose_name = 'Inscrição em Demanda'
+        verbose_name_plural = 'Inscrições em Demandas'
+        unique_together = ['demanda', 'trabalhador']
+        ordering = ['-data_inscricao']

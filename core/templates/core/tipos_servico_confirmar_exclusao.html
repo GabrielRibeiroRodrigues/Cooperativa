@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Excluir Tipo de Serviço{% endblock %}
+
+{% block content %}
+<div class="card col-lg-6 mx-auto">
+    <div class="card-body">
+        <h1 class="h5">Excluir tipo de serviço</h1>
+        <p>Confirma a exclusão de <strong>{{ tipo.nome }}</strong>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">Excluir</button>
+            <a class="btn btn-outline-secondary ms-2" href="{% url 'lista_tipos_servico' %}">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

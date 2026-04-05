@@ -1,0 +1,23 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Publicar Demanda{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="h5 mb-0">Publicar nova demanda</h1>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Defina tipo, data, valor e vagas.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-success" type="submit">Publicar demanda</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
