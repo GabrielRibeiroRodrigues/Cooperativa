@@ -40,6 +40,17 @@
                     <strong>Descrição:</strong>
                     <p class="mt-2">{{ servico.descricao|linebreaks }}</p>
                 </div>
+                <div class="mt-3">
+                    {% if user == servico.contratante %}
+                        <a href="{% url 'chat:criar_conversa' servico.trabalhador.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-comments me-1"></i>Enviar Mensagem para {{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}
+                        </a>
+                    {% elif user == servico.trabalhador %}
+                        <a href="{% url 'chat:criar_conversa' servico.contratante.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-comments me-1"></i>Enviar Mensagem para {{ servico.contratante.get_full_name|default:servico.contratante.username }}
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
 

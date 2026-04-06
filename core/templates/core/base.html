@@ -33,8 +33,27 @@
                         </li>
                         {% if user.role == 'contratante' %}
                             <li class="nav-item">
+
                                 <a class="nav-link" href="{% url 'buscar_trabalhadores' %}">
+
+                                <a class="nav-link" href="{% url 'painel_contratante' %}">
+                                    <i class="fas fa-briefcase me-1"></i>Painel
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'lista_trabalhadores' %}">
+
                                     <i class="fas fa-search me-1"></i>Buscar Trabalhadores
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'publicar_demanda' %}">
+                                    <i class="fas fa-bullhorn me-1"></i>Publicar Demanda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'minhas_demandas' %}">
+                                    <i class="fas fa-list-alt me-1"></i>Minhas Demandas
                                 </a>
                             </li>
                         {% else %}
@@ -43,7 +62,30 @@
                                     <i class="fas fa-calendar-alt me-1"></i>Minha Agenda
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'meus_servicos' %}">
+                                    <i class="fas fa-tractor me-1"></i>Meus Serviços
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'lista_demandas' %}">
+                                    <i class="fas fa-clipboard-check me-1"></i>Demandas Abertas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'minhas_inscricoes' %}">
+                                    <i class="fas fa-paper-plane me-1"></i>Minhas Inscrições
+                                </a>
+                            </li>
                         {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'chat:lista_conversas' %}">
+                                <i class="fas fa-comments me-1"></i>Mensagens
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="badge-mensagens" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -65,10 +107,22 @@
                                 <i class="fas fa-sign-in-alt me-1"></i>Entrar
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'registro' %}">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarRegister" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-user-plus me-1"></i>Registrar
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarRegister">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'registro_contratante' %}">
+                                        <i class="fas fa-briefcase me-2 text-success"></i>Como Contratante
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'registro_trabalhador' %}">
+                                        <i class="fas fa-tractor me-2 text-success"></i>Como Trabalhador
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     {% endif %}
                 </ul>

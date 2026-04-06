@@ -1,0 +1,190 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Chat com {{ outra_parte.username }} - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Cabeçalho da conversa -->
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'chat:lista_conversas' %}" class="btn btn-sm btn-light me-2">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <i class="fas fa-user-circle fa-lg me-2"></i>
+                            <strong>{{ outra_parte.get_full_name|default:outra_parte.username }}</strong>
+                            <small class="ms-2">@{{ outra_parte.username }}</small>
+                        </div>
+                        <span class="badge bg-light text-success">
+                            {{ outra_parte.get_role_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de mensagens -->
+            <div class="card">
+                <div class="card-body" style="height: 500px; overflow-y: auto;" id="chat-container">
+                    <div id="mensagens-container">
+                        {% if mensagens %}
+                            {% for mensagem in mensagens %}
+                                <div class="mb-3 {% if mensagem.remetente == user %}text-end{% endif %}" data-msg-id="{{ mensagem.id }}">
+                                    <div class="d-inline-block" style="max-width: 70%;">
+                                        <div class="card {% if mensagem.remetente == user %}bg-success text-white{% else %}bg-light{% endif %}">
+                                            <div class="card-body py-2 px-3">
+                                                {% if mensagem.remetente != user %}
+                                                    <small class="d-block mb-1"><strong>{{ mensagem.remetente.username }}</strong></small>
+                                                {% endif %}
+                                                <p class="mb-1">{{ mensagem.conteudo }}</p>
+                                                <small class="{% if mensagem.remetente == user %}text-white-50{% else %}text-muted{% endif %}">
+                                                    <i class="far fa-clock me-1"></i>{{ mensagem.data_envio|date:"d/m/Y H:i" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-5">
+                                <i class="fas fa-comments fa-3x mb-3"></i>
+                                <p>Nenhuma mensagem ainda. Envie a primeira!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Formulário de envio -->
+                <div class="card-footer">
+                    <form method="post" id="form-mensagem">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="conteudo" 
+                                   id="input-mensagem"
+                                   placeholder="Digite sua mensagem..." 
+                                   required
+                                   autocomplete="off" />
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane me-1"></i>Enviar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if conversa.servico %}
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Esta conversa está relacionada ao
+                    <a href="{% url 'detalhes_servico' conversa.servico.id %}" class="alert-link">
+                        Serviço #{{ conversa.servico.id }}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+  // Configurações de polling
+  const conversaId = {{ conversa.id }};
+  let ultimaMensagemId = {% if mensagens %}{{ mensagens.last.id }}{% else %}0{% endif %};
+  let pollingInterval = null;
+
+  // Auto-scroll para o final ao carregar
+  function scrollToBottom() {
+      const container = document.getElementById('chat-container');
+      container.scrollTop = container.scrollHeight;
+  }
+
+  // Buscar novas mensagens via AJAX
+  function buscarNovasMensagens() {
+      fetch(`/chat/${conversaId}/novas/?ultima_id=${ultimaMensagemId}`)
+          .then(response => response.json())
+          .then(data => {
+              if (data.count > 0) {
+                  const mensagensContainer = document.getElementById('mensagens-container');
+
+                  // Adicionar novas mensagens
+                  data.mensagens.forEach(msg => {
+                      const msgDiv = criarElementoMensagem(msg);
+                      mensagensContainer.appendChild(msgDiv);
+                      ultimaMensagemId = Math.max(ultimaMensagemId, msg.id);
+                  });
+
+                  // Scroll automático
+                  scrollToBottom();
+
+                  // Marcar como lidas
+                  marcarMensagensLidas();
+              }
+          })
+          .catch(error => console.error('Erro ao buscar mensagens:', error));
+  }
+
+  // Criar elemento HTML para mensagem
+  function criarElementoMensagem(msg) {
+      const div = document.createElement('div');
+      div.className = `mb-3 ${msg.e_minha ? 'text-end' : ''}`;
+      div.setAttribute('data-msg-id', msg.id);
+
+      const cardClass = msg.e_minha ? 'bg-success text-white' : 'bg-light';
+      const timeClass = msg.e_minha ? 'text-white-50' : 'text-muted';
+
+      div.innerHTML = `
+          <div class="d-inline-block" style="max-width: 70%;">
+              <div class="card ${cardClass}">
+                  <div class="card-body py-2 px-3">
+                      ${!msg.e_minha ? `<small class="d-block mb-1"><strong>${msg.remetente__username}</strong></small>` : ''}
+                      <p class="mb-1">${msg.conteudo}</p>
+                      <small class="${timeClass}">
+                          <i class="far fa-clock me-1"></i>${msg.data_envio}
+                      </small>
+                  </div>
+              </div>
+          </div>
+      `;
+
+      return div;
+  }
+
+  // Marcar mensagens como lidas via AJAX
+  function marcarMensagensLidas() {
+      fetch(`/chat/${conversaId}/marcar-lidas/`, {
+          method: 'POST',
+          headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+              'Content-Type': 'application/json'
+          }
+      }).catch(error => console.error('Erro ao marcar mensagens como lidas:', error));
+  }
+
+  // Iniciar polling quando a página carregar
+  document.addEventListener('DOMContentLoaded', function() {
+      scrollToBottom();
+
+      // Polling a cada 3 segundos
+      pollingInterval = setInterval(buscarNovasMensagens, 3000);
+
+      // Focar no input
+      document.getElementById('input-mensagem').focus();
+  });
+
+  // Parar polling quando sair da página
+  window.addEventListener('beforeunload', function() {
+      if (pollingInterval) {
+          clearInterval(pollingInterval);
+      }
+  });
+
+  // Auto-scroll ao enviar mensagem
+  document.getElementById('form-mensagem').addEventListener('submit', function() {
+      setTimeout(scrollToBottom, 100);
+  });
+</script>
+{% endblock %}
