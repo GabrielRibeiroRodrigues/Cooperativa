@@ -116,11 +116,30 @@
                         {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Enviar PDF Assinado</label>
-                            {{ form_upload.arquivo_pdf_assinado }}
+                            <label for="{{ form_upload.arquivo_pdf_assinado.id_for_label }}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="fas fa-file-upload me-2"></i>Selecionar Arquivo PDF
+                            </label>
+                            <div style="display: none;">
+                                {{ form_upload.arquivo_pdf_assinado }}
+                            </div>
+                            <div id="file-name-display" class="alert alert-light py-1 px-2 mb-2 small border" style="display: none;">
+                                <i class="fas fa-paperclip me-1"></i> <span id="file-name-text"></span>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-upload me-2"></i>Enviar Assinatura
+                        <button type="submit" class="btn btn-success w-100" id="btn-submit-assinatura" style="display: none;">
+                            <i class="fas fa-check-circle me-2"></i>Confirmar e Enviar Assinatura
                         </button>
+
+                        <script>
+                            document.getElementById('{{ form_upload.arquivo_pdf_assinado.id_for_label }}').addEventListener('change', function(e) {
+                                const fileName = e.target.files[0] ? e.target.files[0].name : '';
+                                if (fileName) {
+                                    document.getElementById('file-name-text').textContent = fileName;
+                                    document.getElementById('file-name-display').style.display = 'block';
+                                    document.getElementById('btn-submit-assinatura').style.display = 'block';
+                                }
+                            });
+                        </script>
                     </form>
                 {% endif %}
 

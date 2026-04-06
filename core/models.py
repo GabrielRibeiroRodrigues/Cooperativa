@@ -84,8 +84,14 @@ class Servico(models.Model):
         help_text='Descreva o trabalho a ser realizado'
     )
     data_servico = models.DateField(
-        verbose_name='Data do Serviço',
+        verbose_name='Data de Início',
         default=timezone.now
+    )
+    data_fim = models.DateField(
+        verbose_name='Data de Término',
+        null=True,
+        blank=True,
+        help_text='Deixe em branco se for apenas um dia'
     )
     valor_acordado = models.DecimalField(
         max_digits=8, 

@@ -28,7 +28,7 @@
                     <div class="col-md-6">
                         <p><strong>Contratante:</strong> {{ servico.contratante.get_full_name|default:servico.contratante.username }}</p>
                         <p><strong>Trabalhador:</strong> {{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}</p>
-                        <p><strong>Data do Serviço:</strong> {{ servico.data_servico|date:"d/m/Y" }}</p>
+                        <p><strong>Período:</strong> {{ servico.data_servico|date:"d/m/Y" }}{% if servico.data_fim %} até {{ servico.data_fim|date:"d/m/Y" }}{% endif %}</p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Valor Acordado:</strong> R$ {{ servico.valor_acordado|floatformat:2 }}</p>

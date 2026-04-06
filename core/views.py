@@ -249,6 +249,9 @@ def detalhes_servico(request, servico_id):
     return render(request, 'core/detalhes_servico.html', context)
 
 
+from datetime import timedelta, date
+from disponibilidade.models import Disponibilidade
+
 @login_required
 def aceitar_servico(request, servico_id):
     """Trabalhador aceita serviço"""
@@ -266,6 +269,25 @@ def aceitar_servico(request, servico_id):
         else:
             servico.status = 'aceito'
             servico.save()
+            
+            # --- AUTOMAÇÃO DA AGENDA [ETAPA 6] ---
+            # Bloqueia todos os dias entre data_servico e data_fim
+            data_ini = servico.data_servico
+            data_fim = servico.data_fim or data_ini # Se não tiver fim, é apenas 1 dia
+            
+            atual = data_ini
+            while atual <= data_fim:
+                # Marcamos os 3 turnos como ocupados para bloqueio total
+                for turno in ['manha', 'tarde', 'integral']:
+                    Disponibilidade.objects.update_or_create(
+                        trabalhador=servico.trabalhador,
+                        data=atual,
+                        turno=turno,
+                        defaults={'status': 'ocupado'}
+                    )
+                atual += timedelta(days=1)
+            # --------------------------------------
+            
             messages.success(request, 'Serviço aceito! Agora, preencha os dados básicos para gerar o contrato.')
             return redirect('contratos:gerar_contrato', servico_id=servico.id)
     else:

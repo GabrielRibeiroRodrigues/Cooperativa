@@ -77,20 +77,32 @@ class PerfilForm(forms.ModelForm):
 class ServicoForm(forms.ModelForm):
     class Meta:
         model = Servico
-        fields = ['descricao', 'data_servico']
+        fields = ['descricao', 'data_servico', 'data_fim']
         labels = {
             'descricao': 'Descrição do trabalho',
-            'data_servico': 'Data do serviço',
+            'data_servico': 'Data de Início',
+            'data_fim': 'Data de Término',
         }
         widgets = {
             'descricao': forms.Textarea(attrs={'rows': 4}),
             'data_servico': forms.DateInput(attrs={'type': 'date'}),
+            'data_fim': forms.DateInput(attrs={'type': 'date'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        data_inicio = cleaned_data.get('data_servico')
+        data_fim = cleaned_data.get('data_fim')
+
+        if data_inicio and data_fim and data_fim < data_inicio:
+            raise forms.ValidationError('A data de término não pode ser anterior à data de início.')
+        
+        return cleaned_data
 
 
 class AvaliacaoForm(forms.ModelForm):

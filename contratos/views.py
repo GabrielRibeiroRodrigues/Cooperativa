@@ -55,6 +55,7 @@ def gerar_contrato(request, servico_id):
         initial_data = {
             'valor': servico.valor_acordado,
             'data_inicio': servico.data_servico,
+            'data_fim': servico.data_fim,
             'descricao_servico': servico.descricao,
         }
         form = ContratoForm(initial=initial_data)

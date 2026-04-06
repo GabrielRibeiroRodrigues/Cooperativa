@@ -42,6 +42,11 @@
                             {{ trabalhador.servicos_trabalhados.count }} trabalhos realizados
                         </small>
                     </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'disponibilidade:consultar_agenda' trabalhador.id %}" class="btn btn-outline-success">
+                            <i class="far fa-calendar-alt me-2"></i>Ver Agenda de Disponibilidade
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,9 +75,16 @@
                         <div class="form-text">Descreva detalhadamente o trabalho que precisa ser realizado</div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label for="{{ form.data_servico.id_for_label }}" class="form-label">{{ form.data_servico.label }}</label>
-                        {{ form.data_servico }}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.data_servico.id_for_label }}" class="form-label">{{ form.data_servico.label }}</label>
+                            {{ form.data_servico }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.data_fim.id_for_label }}" class="form-label">{{ form.data_fim.label }}</label>
+                            {{ form.data_fim }}
+                            <small class="text-muted">Deixe em branco se for apenas um dia</small>
+                        </div>
                     </div>
                     
                     <div class="row mb-3">
