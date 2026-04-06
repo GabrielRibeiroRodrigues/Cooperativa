@@ -1,0 +1,82 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Mensagens - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-comments me-2"></i>Mensagens</h2>
+                {% if total_nao_lidas > 0 %}
+                    <span class="badge bg-danger rounded-pill fs-6">{{ total_nao_lidas }} não lida{{ total_nao_lidas|pluralize }}</span>
+                {% endif %}
+            </div>
+
+            {% if conversas_data %}
+                <div class="list-group">
+                    {% for item in conversas_data %}
+                        <a href="{% url 'chat:chat' item.conversa.id %}" 
+                           class="list-group-item list-group-item-action {% if item.nao_lidas > 0 %}list-group-item-primary{% endif %}">
+                            <div class="d-flex w-100 justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="fas fa-user-circle fa-2x text-secondary me-3"></i>
+                                        <div>
+                                            <h5 class="mb-0">
+                                                {{ item.outra_parte.get_full_name|default:item.outra_parte.username }}
+                                                <small class="text-muted">@{{ item.outra_parte.username }}</small>
+                                            </h5>
+                                            <small class="text-muted">
+                                                <i class="fas fa-briefcase me-1"></i>{{ item.outra_parte.get_role_display }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if item.ultima_mensagem %}
+                                        <p class="mb-1 text-truncate" style="max-width: 600px;">
+                                            <strong>{% if item.ultima_mensagem.remetente == user %}Você:{% else %}{{ item.outra_parte.username }}:{% endif %}</strong>
+                                            {{ item.ultima_mensagem.conteudo }}
+                                        </p>
+                                        <small class="text-muted">
+                                            <i class="far fa-clock me-1"></i>{{ item.ultima_mensagem.data_envio|date:"d/m/Y H:i" }}
+                                        </small>
+                                    {% else %}
+                                        <p class="mb-0 text-muted fst-italic">
+                                            <i class="fas fa-info-circle me-1"></i>Nenhuma mensagem ainda
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="ms-3">
+                                    {% if item.nao_lidas > 0 %}
+                                        <span class="badge bg-danger rounded-pill">{{ item.nao_lidas }}</span>
+                                    {% else %}
+                                        <i class="fas fa-chevron-right text-muted"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if item.conversa.servico %}
+                                <div class="mt-2">
+                                    <span class="badge bg-info text-dark">
+                                        <i class="fas fa-link me-1"></i>Relacionado ao Serviço #{{ item.conversa.servico.id }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                    <h4>Nenhuma conversa ainda</h4>
+                    <p class="text-muted mb-0">Suas conversas aparecerão aqui quando você enviar ou receber mensagens.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
