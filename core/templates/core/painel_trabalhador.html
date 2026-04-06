@@ -107,6 +107,24 @@
 {% endif %}
 
 <div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-light border-success">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="card-title mb-1 text-success">
+                        <i class="far fa-calendar-alt me-2"></i>Sua Disponibilidade
+                    </h5>
+                    <p class="card-text text-muted mb-0">Gerencie seus dias de folga e turnos de trabalho para receber propostas melhores.</p>
+                </div>
+                <a href="{% url 'disponibilidade:agenda_trabalhador' %}" class="btn btn-success">
+                    <i class="fas fa-calendar-edit me-2"></i>Gerenciar Agenda
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
     <div class="col-md-3 mb-3">
         <div class="card text-center bg-primary text-white">
             <div class="card-body">

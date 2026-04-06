@@ -21,14 +21,28 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% if user.role == 'contratante' %}{% url 'painel_contratante' %}{% else %}{% url 'painel_trabalhador' %}{% endif %}">
+                                <i class="fas {% if user.role == 'contratante' %}fa-briefcase{% else %}fa-tools{% endif %} me-1"></i>Painel
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'contratos:lista_contratos' %}">
+                                <i class="fas fa-file-contract me-1"></i>Contratos
+                            </a>
+                        </li>
                         {% if user.role == 'contratante' %}
                             <li class="nav-item">
+
+                                <a class="nav-link" href="{% url 'buscar_trabalhadores' %}">
+
                                 <a class="nav-link" href="{% url 'painel_contratante' %}">
                                     <i class="fas fa-briefcase me-1"></i>Painel
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'lista_trabalhadores' %}">
+
                                     <i class="fas fa-search me-1"></i>Buscar Trabalhadores
                                 </a>
                             </li>
@@ -44,8 +58,8 @@
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'painel_trabalhador' %}">
-                                    <i class="fas fa-tools me-1"></i>Painel
+                                <a class="nav-link" href="{% url 'disponibilidade:agenda_trabalhador' %}">
+                                    <i class="fas fa-calendar-alt me-1"></i>Minha Agenda
                                 </a>
                             </li>
                             <li class="nav-item">

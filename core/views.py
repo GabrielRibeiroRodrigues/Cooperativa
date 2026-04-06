@@ -309,6 +309,9 @@ def detalhes_servico(request, servico_id):
     return render(request, 'core/detalhes_servico.html', context)
 
 
+from datetime import timedelta, date
+from disponibilidade.models import Disponibilidade
+
 @login_required
 def aceitar_servico(request, servico_id):
     """Trabalhador aceita serviço"""
@@ -326,7 +329,27 @@ def aceitar_servico(request, servico_id):
         else:
             servico.status = 'aceito'
             servico.save()
-            messages.success(request, 'Serviço aceito! Você pode iniciar a jornada de trabalho.')
+            
+            # --- AUTOMAÇÃO DA AGENDA [ETAPA 6] ---
+            # Bloqueia todos os dias entre data_servico e data_fim
+            data_ini = servico.data_servico
+            data_fim = servico.data_fim or data_ini # Se não tiver fim, é apenas 1 dia
+            
+            atual = data_ini
+            while atual <= data_fim:
+                # Marcamos os 3 turnos como ocupados para bloqueio total
+                for turno in ['manha', 'tarde', 'integral']:
+                    Disponibilidade.objects.update_or_create(
+                        trabalhador=servico.trabalhador,
+                        data=atual,
+                        turno=turno,
+                        defaults={'status': 'ocupado'}
+                    )
+                atual += timedelta(days=1)
+            # --------------------------------------
+            
+            messages.success(request, 'Serviço aceito! Agora, preencha os dados básicos para gerar o contrato.')
+            return redirect('contratos:gerar_contrato', servico_id=servico.id)
     else:
         messages.error(request, 'Este serviço não pode ser aceito.')
     
@@ -371,6 +394,10 @@ def controle_jornada(request, servico_id, acao):
     agora = timezone.now()
     
     if acao == 'iniciar':
+        if not servico.pode_iniciar_jornada:
+            messages.error(request, 'Você não pode iniciar a jornada antes que o contrato esteja assinado e vigente.')
+            return redirect('detalhes_servico', servico_id=servico.id)
+            
         if not controle.hora_inicio:
             controle.hora_inicio = agora
             controle.save()
@@ -453,12 +480,16 @@ def status_jornada_ajax(request, servico_id):
             'hora_pausa': controle.hora_pausa.strftime('%H:%M') if controle.hora_pausa else None,
             'hora_retorno': controle.hora_retorno.strftime('%H:%M') if controle.hora_retorno else None,
             'hora_fim': controle.hora_fim.strftime('%H:%M') if controle.hora_fim else None,
+            'pode_iniciar': servico.pode_iniciar_jornada,
+            'contrato_pendente': not servico.pode_iniciar_jornada
         })
     except ControleJornada.DoesNotExist:
         return JsonResponse({
             'status': 'nao_iniciada',
             'alerta_8h': False,
             'total_horas': 0,
+            'pode_iniciar': servico.pode_iniciar_jornada,
+            'contrato_pendente': not servico.pode_iniciar_jornada
         })
 
 

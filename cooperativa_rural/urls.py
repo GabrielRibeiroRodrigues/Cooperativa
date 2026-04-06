@@ -23,8 +23,18 @@ admin.site.site_header = "Administração - Cooperativa Rural"
 admin.site.site_title = "Cooperativa Rural"
 admin.site.index_title = "Painel Administrativo"
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("core.urls")),
+
+    path('admin/', admin.site.urls),
+    path('', include('core.urls')),
+    path('contratos/', include('contratos.urls')),
+
     path("chat/", include("chat.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

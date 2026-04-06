@@ -1,0 +1,212 @@
+{% extends 'core/base.html' %}
+{% load disponibilidade_extras %}
+
+{% block title %}Minha Agenda - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<style>
+    .calendar-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .month-nav {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #198754;
+    }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+    .day-name {
+        text-align: center;
+        font-weight: bold;
+        color: #6c757d;
+        padding-bottom: 10px;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+    }
+    .calendar-day {
+        min-height: 120px;
+        border: 1px solid #f0f0f0;
+        border-radius: 10px;
+        padding: 8px;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    .calendar-day.empty {
+        background: #fafafa;
+        border: none;
+    }
+    .calendar-day.today {
+        border: 2px solid #198754;
+        background: #e9f7ef;
+    }
+    .day-number {
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .slots {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .slot {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: center;
+        border: 1px dashed #ccc;
+        transition: 0.2s;
+        user-select: none;
+    }
+    .slot:hover {
+        background: #f8f9fa;
+        transform: translateY(-1px);
+    }
+    /* Status Colors - Simple 2-status Logic */
+    .slot.status-disponivel {
+        background: #e9f7ef; /* Verde bem claro */
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .slot.status-bloqueado, 
+    .slot.status-ocupado {
+        background: #dc3545; /* Vermelho */
+        color: #fff;
+        border-style: solid;
+        border-color: #dc3545;
+    }
+    .slot.status-ocupado {
+        cursor: not-allowed;
+    }
+    
+    .legend {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1><i class="far fa-calendar-alt me-2 text-success"></i>Minha Agenda de Disponibilidade</h1>
+            <button class="btn btn-outline-success" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+        <p class="text-muted">Clique nos turnos (Manhã, Tarde ou Integral) para bloquear ou liberar as datas.</p>
+    </div>
+</div>
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <a href="?mes={{ anterior.mes }}&ano={{ anterior.ano }}" class="btn btn-outline-secondary">
+            <i class="fas fa-chevron-left"></i> Anterior
+        </a>
+        <div class="month-nav">
+            {{ nome_mes }} de {{ ano }}
+        </div>
+        <a href="?mes={{ proximo.mes }}&ano={{ proximo.ano }}" class="btn btn-outline-secondary">
+            Próximo <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="calendar-grid">
+        <div class="day-name">Dom</div>
+        <div class="day-name">Seg</div>
+        <div class="day-name">Ter</div>
+        <div class="day-name">Qua</div>
+        <div class="day-name">Qui</div>
+        <div class="day-name">Sex</div>
+        <div class="day-name">Sáb</div>
+
+        {% for semana in dias_calendario %}
+            {% for dia, dia_semana in semana %}
+                {% if dia == 0 %}
+                    <div class="calendar-day empty"></div>
+                {% else %}
+                    <div class="calendar-day {% if hoje.year == ano and hoje.month == mes and hoje.day == dia %}today{% endif %}">
+                        <span class="day-number">{{ dia }}</span>
+                        
+                        <div class="slots">
+                            {% for turno_cod, turno_nome in "manha:Manhã,tarde:Tarde,integral:Integral"|split_commas_and_colons %}
+                                <div class="slot slot-{{ turno_cod }} status-{% get_status mapa_disp ano mes dia turno_cod %}" 
+                                     onclick="toggleSlot('{{ ano }}-{{ mes|stringformat:'02i' }}-{{ dia|stringformat:'02i' }}', '{{ turno_cod }}', this)">
+                                    {{ turno_nome }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="legend border-top pt-3">
+        <div class="legend-item"><span class="dot" style="background: #e9f7ef; border: 1px solid #c3e6cb;"></span> Disponível</div>
+        <div class="legend-item"><span class="dot bg-danger"></span> Trabalhando</div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleSlot(data, turno, element) {
+    if (element.classList.contains('status-ocupado')) {
+        alert('Este horário já está ocupado por um serviço agendado.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('data', data);
+    formData.append('turno', turno);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    element.style.opacity = '0.5';
+
+    fetch("{% url 'disponibilidade:api_toggle' %}", {
+        method: 'POST',
+        body: formData
+    })
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro no servidor');
+        }
+        return data;
+    })
+    .then(data => {
+        element.style.opacity = '1';
+        if (data.status === 'success') {
+            element.classList.remove('status-disponivel', 'status-bloqueado');
+            element.classList.add('status-' + data.novo_status);
+        }
+    })
+    .catch(error => {
+        element.style.opacity = '1';
+        console.error('Erro:', error);
+        alert('Ops! Algo deu errado: ' + error.message);
+    });
+}
+</script>
+{% endblock %}
