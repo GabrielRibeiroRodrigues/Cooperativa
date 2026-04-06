@@ -14,7 +14,12 @@
             <div class="col-md-3"><strong>Vagas:</strong> {{ demanda.vagas_disponiveis }}/{{ demanda.vagas }}</div>
         </div>
         <hr>
-        <p class="mb-0">{{ demanda.descricao }}</p>
+        <p class="mb-3">{{ demanda.descricao }}</p>
+        {% if user.role == 'trabalhador' and user != demanda.contratante %}
+            <a href="{% url 'chat:criar_conversa' demanda.contratante.id %}" class="btn btn-outline-primary">
+                <i class="fas fa-comments me-1"></i>Enviar Mensagem para {{ demanda.contratante.get_full_name|default:demanda.contratante.username }}
+            </a>
+        {% endif %}
     </div>
 </div>
 

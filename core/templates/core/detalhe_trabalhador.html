@@ -17,15 +17,9 @@
                     <a href="{% url 'detalhes_trabalhador' trabalhador.id %}" class="btn btn-success">
                         <i class="fas fa-handshake me-1"></i>Contratar
                     </a>
-                    {% if servico_chat %}
-                        <a href="{% url 'detalhes_servico' servico_chat.id %}" class="btn btn-outline-primary">
-                            <i class="fas fa-comments me-1"></i>Abrir chat
-                        </a>
-                    {% else %}
-                        <button class="btn btn-outline-secondary" disabled>
-                            <i class="fas fa-comments me-1"></i>Chat após contratação
-                        </button>
-                    {% endif %}
+                    <a href="{% url 'chat:criar_conversa' trabalhador.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-comments me-1"></i>Enviar Mensagem
+                    </a>
                 </div>
             </div>
         </div>
