@@ -11,6 +11,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ('contratante', 'Contratante'),
         ('trabalhador', 'Trabalhador'),
+        ('admin', 'Administrador'),
     ]
     
     role = models.CharField(
@@ -64,6 +65,12 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'
+
+    def save(self, *args, **kwargs):
+        if self.is_superuser:
+            self.role = 'admin'
+            
+        super().save(*args, **kwargs)
 
 
 class Servico(models.Model):
