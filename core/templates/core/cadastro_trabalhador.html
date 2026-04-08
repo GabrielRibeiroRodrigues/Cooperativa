@@ -1,97 +1,180 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Registro de Trabalhador - Cooperativa Rural{% endblock %}
+{% block title %}Cadastro de Trabalhador - Mandik{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'sans-serif'],
+                },
+                colors: {
+                    mandik: {
+                        50: '#f2fbf5',
+                        100: '#e0f7e7',
+                        500: '#2f8f57',
+                        600: '#27774a',
+                        700: '#1f5f3b',
+                        900: '#103222',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .register-worker-bg {
+        background:
+            radial-gradient(circle at 10% 20%, rgba(47, 143, 87, 0.12), transparent 34%),
+            radial-gradient(circle at 86% 14%, rgba(16, 50, 34, 0.11), transparent 30%),
+            linear-gradient(180deg, #f7fbf8 0%, #ecf5ef 100%);
+    }
+
+    .worker-form .form-control {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #cbd5e1;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background: #fff;
+        outline: none;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .worker-form .form-control:focus {
+        border-color: #2f8f57;
+        box-shadow: 0 0 0 4px rgba(47, 143, 87, 0.15);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card">
-            <div class="card-header text-center bg-success text-white">
-                <h4><i class="fas fa-tractor me-2"></i>Cadastro de Trabalhador</h4>
-                <p class="mb-0 small">Ofereça seus serviços e encontre oportunidades</p>
+<section class="register-worker-bg -mx-3 sm:-mx-4 lg:-mx-6 px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-4xl">
+        <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-xl backdrop-blur-sm">
+            <div class="bg-mandik-900 px-6 py-7 text-white sm:px-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-mandik-100">Mandik</p>
+                <h1 class="mt-3 text-2xl font-extrabold sm:text-3xl">
+                    <i class="fas fa-tractor mr-2" aria-hidden="true"></i>Cadastro de Trabalhador
+                </h1>
+                <p class="mt-2 text-sm text-mandik-100 sm:text-base">Ofereca seus servicos e aumente suas oportunidades no campo.</p>
             </div>
-            <div class="card-body">
-                <form method="post">
+
+            <div class="p-6 sm:p-8">
+                <form method="post" class="worker-form space-y-5" novalidate>
                     {% csrf_token %}
-                    
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.errors }}
+
+                    {% if form.non_field_errors %}
+                        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert" aria-live="polite">
+                            {{ form.non_field_errors }}
                         </div>
                     {% endif %}
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="{{ form.first_name.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.first_name.label }}</label>
                             {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <p class="mt-1 text-xs text-red-600">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                        <div>
+                            <label for="{{ form.last_name.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.last_name.label }}</label>
                             {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <p class="mt-1 text-xs text-red-600">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
                         </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                        {{ form.username }}
-                        <div class="form-text">{{ form.username.help_text }}</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
-                        {{ form.email }}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
-                        {{ form.telefone }}
                     </div>
 
-                    <div class="mb-3">
-                        <label for="{{ form.cpf.id_for_label }}" class="form-label">{{ form.cpf.label }}</label>
-                        {{ form.cpf }}
-                        {% if form.cpf.errors %}
-                            <div class="form-text text-danger">{{ form.cpf.errors.0 }}</div>
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        <p class="mt-1 text-xs text-slate-500">{{ form.username.help_text }}</p>
+                        {% if form.username.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ form.username.errors.0 }}</p>
                         {% endif %}
                     </div>
-                    
-                    <div class="mb-3 bg-light p-3 rounded border">
-                        <label for="{{ form.valor_diario.id_for_label }}" class="form-label text-success fw-bold">
-                            <i class="fas fa-money-bill-wave me-1"></i>{{ form.valor_diario.label }}
+
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.telefone.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.telefone.label }}</label>
+                        {{ form.telefone }}
+                        {% if form.telefone.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ form.telefone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.cpf.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.cpf.label }}</label>
+                        {{ form.cpf }}
+                        {% if form.cpf.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ form.cpf.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="rounded-2xl border border-mandik-100 bg-mandik-50 p-4">
+                        <label for="{{ form.valor_diario.id_for_label }}" class="mb-1 block text-sm font-semibold text-mandik-700">
+                            <i class="fas fa-money-bill-wave mr-1" aria-hidden="true"></i>{{ form.valor_diario.label }}
                         </label>
                         {{ form.valor_diario }}
-                        <div class="form-text">{{ form.valor_diario.help_text }}</div>
+                        <p class="mt-1 text-xs text-mandik-700/80">{{ form.valor_diario.help_text }}</p>
+                        {% if form.valor_diario.errors %}
+                            <p class="mt-1 text-xs text-red-600">{{ form.valor_diario.errors.0 }}</p>
+                        {% endif %}
                     </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">{{ form.password1.label }}</label>
+
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="{{ form.password1.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.password1.label }}</label>
                             {{ form.password1 }}
+                            {% if form.password1.errors %}
+                                <p class="mt-1 text-xs text-red-600">{{ form.password1.errors.0 }}</p>
+                            {% endif %}
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">{{ form.password2.label }}</label>
+                        <div>
+                            <label for="{{ form.password2.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">{{ form.password2.label }}</label>
                             {{ form.password2 }}
+                            {% if form.password2.errors %}
+                                <p class="mt-1 text-xs text-red-600">{{ form.password2.errors.0 }}</p>
+                            {% endif %}
                         </div>
                     </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check me-2"></i>Finalizar Cadastro
+
+                    <div class="pt-2">
+                        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
+                            <i class="fas fa-check" aria-hidden="true"></i>
+                            Finalizar Cadastro
                         </button>
                     </div>
                 </form>
             </div>
-            <div class="card-footer text-center">
-                <p class="mb-2">
-                    Já tem uma conta? <a href="{% url 'login' %}" class="text-success">Entre aqui</a>
+
+            <div class="border-t border-slate-200 bg-slate-50 px-6 py-4 text-center sm:px-8">
+                <p class="mb-1 text-sm text-slate-600">
+                    Ja tem uma conta? <a href="{% url 'login' %}" class="font-semibold text-mandik-700 hover:text-mandik-900">Entre aqui</a>
                 </p>
-                <p class="mb-0 small">
-                    Precisa contratar serviços? <a href="{% url 'registro_contratante' %}" class="text-success">Cadastre-se aqui</a>
+                <p class="text-sm text-slate-600">
+                    Precisa contratar servicos? <a href="{% url 'registro_contratante' %}" class="font-semibold text-mandik-700 hover:text-mandik-900">Cadastre-se aqui</a>
                 </p>
             </div>
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}
