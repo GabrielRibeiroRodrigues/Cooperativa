@@ -1,98 +1,135 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Painel do Trabalhador - Cooperativa Rural{% endblock %}
+{% block title %}Painel do Trabalhador - Mandik{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Manrope', 'sans-serif'],
+                },
+                colors: {
+                    mandik: {
+                        50: '#f2fbf5',
+                        100: '#e0f7e7',
+                        500: '#2f8f57',
+                        600: '#27774a',
+                        700: '#1f5f3b',
+                        900: '#103222',
+                    }
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .worker-dashboard-bg {
+        background:
+            radial-gradient(circle at 14% 16%, rgba(47, 143, 87, 0.1), transparent 36%),
+            radial-gradient(circle at 86% 12%, rgba(16, 50, 34, 0.08), transparent 30%),
+            linear-gradient(180deg, #f7fbf8 0%, #eef5f0 100%);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1><i class="fas fa-tools me-2"></i>Painel do Trabalhador</h1>
-        <p class="text-muted">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
-    </div>
-</div>
+<section class="worker-dashboard-bg -mx-3 space-y-6 px-4 py-8 sm:-mx-4 sm:px-6 lg:-mx-6 lg:px-8">
+    <div class="mx-auto max-w-7xl space-y-6">
+        <header class="rounded-3xl border border-white/80 bg-white/85 p-6 shadow-lg backdrop-blur-sm">
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-mandik-700">Mandik</p>
+            <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                <i class="fas fa-tools mr-2 text-mandik-600" aria-hidden="true"></i>Painel do Trabalhador
+            </h1>
+            <p class="mt-1 text-sm text-slate-600">Bem-vindo, {{ user.get_full_name|default:user.username }}!</p>
+        </header>
 
 {% if servico_ativo %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card border-success">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-play-circle me-2"></i>Serviço Ativo
-                </h5>
+        <section class="overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-sm">
+            <div class="bg-mandik-600 px-6 py-4 text-white">
+                <h2 class="text-lg font-bold">
+                    <i class="fas fa-play-circle mr-2" aria-hidden="true"></i>Servico Ativo
+                </h2>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h6>{{ servico_ativo.descricao|truncatechars:100 }}</h6>
-                        <p class="mb-1"><strong>Contratante:</strong> {{ servico_ativo.contratante.get_full_name|default:servico_ativo.contratante.username }}</p>
-                        <p class="mb-1"><strong>Data:</strong> {{ servico_ativo.data_servico|date:"d/m/Y" }}</p>
-                        <p class="mb-0"><strong>Valor:</strong> R$ {{ servico_ativo.valor_acordado|floatformat:2 }}</p>
+
+            <div class="space-y-4 p-6">
+                <div class="grid gap-4 md:grid-cols-3 md:items-start">
+                    <div class="md:col-span-2">
+                        <h3 class="text-base font-semibold text-slate-900">{{ servico_ativo.descricao|truncatechars:100 }}</h3>
+                        <p class="mt-2 text-sm text-slate-700"><span class="font-semibold">Contratante:</span> {{ servico_ativo.contratante.get_full_name|default:servico_ativo.contratante.username }}</p>
+                        <p class="text-sm text-slate-700"><span class="font-semibold">Data:</span> {{ servico_ativo.data_servico|date:"d/m/Y" }}</p>
+                        <p class="text-sm text-slate-700"><span class="font-semibold">Valor:</span> R$ {{ servico_ativo.valor_acordado|floatformat:2 }}</p>
                     </div>
-                    <div class="col-md-4 text-end">
-                        <a href="{% url 'detalhes_servico' servico_ativo.id %}" class="btn btn-outline-success mb-2">
-                            <i class="fas fa-eye me-2"></i>Ver Detalhes
+                    <div class="flex flex-col items-stretch gap-2 md:items-end">
+                        <a href="{% url 'detalhes_servico' servico_ativo.id %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-mandik-200 bg-mandik-50 px-4 py-2 text-sm font-semibold text-mandik-700 transition hover:bg-mandik-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
+                            <i class="fas fa-eye" aria-hidden="true"></i>Ver Detalhes
                         </a>
-                        <br>
-                        <a href="{% url 'chat:criar_conversa' servico_ativo.contratante.id %}" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-comments me-1"></i>Mensagem
+                        <a href="{% url 'chat:criar_conversa' servico_ativo.contratante.id %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">
+                            <i class="fas fa-comments" aria-hidden="true"></i>Mensagem
                         </a>
                     </div>
                 </div>
-                
+
                 {% if jornada_ativa %}
-                <hr>
-                <div class="jornada-controls">
-                    <div class="jornada-status {{ jornada_ativa.status_jornada }}">
-                        <i class="fas fa-clock me-2"></i>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+                        <i class="fas fa-clock mr-2" aria-hidden="true"></i>
                         {% if jornada_ativa.status_jornada == 'nao_iniciada' %}
-                            Jornada não iniciada
+                            Jornada nao iniciada
                         {% elif jornada_ativa.status_jornada == 'em_andamento' %}
                             Jornada em andamento
                         {% elif jornada_ativa.status_jornada == 'pausada' %}
-                            Jornada pausada (almoço)
+                            Jornada pausada (almoco)
                         {% elif jornada_ativa.status_jornada == 'finalizada' %}
                             Jornada finalizada
                         {% endif %}
                     </div>
-                    
+
                     {% if jornada_ativa.alerta_8_horas and jornada_ativa.status_jornada != 'finalizada' %}
-                    <div class="alerta-8h">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Atenção:</strong> Você já trabalhou 8 horas hoje!
+                    <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        <i class="fas fa-exclamation-triangle mr-2" aria-hidden="true"></i>
+                        <strong>Atencao:</strong> Voce ja trabalhou 8 horas hoje!
                     </div>
                     {% endif %}
-                    
-                    <div class="row">
-                        <div class="col-md-6">
+
+                    <div class="grid gap-4 md:grid-cols-2 md:items-start">
+                        <div class="space-y-1 text-sm text-slate-700">
                             {% if jornada_ativa.hora_inicio %}
-                                <p><strong>Início:</strong> {{ jornada_ativa.hora_inicio|time:"H:i" }}</p>
+                                <p><span class="font-semibold">Inicio:</span> {{ jornada_ativa.hora_inicio|time:"H:i" }}</p>
                             {% endif %}
                             {% if jornada_ativa.hora_pausa %}
-                                <p><strong>Pausa:</strong> {{ jornada_ativa.hora_pausa|time:"H:i" }}</p>
+                                <p><span class="font-semibold">Pausa:</span> {{ jornada_ativa.hora_pausa|time:"H:i" }}</p>
                             {% endif %}
                             {% if jornada_ativa.hora_retorno %}
-                                <p><strong>Retorno:</strong> {{ jornada_ativa.hora_retorno|time:"H:i" }}</p>
+                                <p><span class="font-semibold">Retorno:</span> {{ jornada_ativa.hora_retorno|time:"H:i" }}</p>
                             {% endif %}
                             {% if jornada_ativa.hora_fim %}
-                                <p><strong>Fim:</strong> {{ jornada_ativa.hora_fim|time:"H:i" }}</p>
-                                <p><strong>Total:</strong> {{ jornada_ativa.total_horas }}h</p>
+                                <p><span class="font-semibold">Fim:</span> {{ jornada_ativa.hora_fim|time:"H:i" }}</p>
+                                <p><span class="font-semibold">Total:</span> {{ jornada_ativa.total_horas }}h</p>
                             {% endif %}
                         </div>
-                        <div class="col-md-6">
-                            <div class="btn-group d-flex" role="group">
+
+                        <div>
+                            <div class="flex flex-wrap gap-2" role="group" aria-label="Controles da jornada">
                                 {% if jornada_ativa.status_jornada == 'nao_iniciada' %}
-                                    <a href="{% url 'controle_jornada' servico_ativo.id 'iniciar' %}" class="btn btn-success">
-                                        <i class="fas fa-play me-1"></i>Iniciar
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'iniciar' %}" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">
+                                        <i class="fas fa-play" aria-hidden="true"></i>Iniciar
                                     </a>
                                 {% elif jornada_ativa.status_jornada == 'em_andamento' %}
-                                    <a href="{% url 'controle_jornada' servico_ativo.id 'pausar' %}" class="btn btn-warning">
-                                        <i class="fas fa-pause me-1"></i>Pausar
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'pausar' %}" class="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-amber-500">
+                                        <i class="fas fa-pause" aria-hidden="true"></i>Pausar
                                     </a>
-                                    <a href="{% url 'controle_jornada' servico_ativo.id 'finalizar' %}" class="btn btn-danger">
-                                        <i class="fas fa-stop me-1"></i>Finalizar
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'finalizar' %}" class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                                        <i class="fas fa-stop" aria-hidden="true"></i>Finalizar
                                     </a>
                                 {% elif jornada_ativa.status_jornada == 'pausada' %}
-                                    <a href="{% url 'controle_jornada' servico_ativo.id 'retomar' %}" class="btn btn-info">
-                                        <i class="fas fa-play me-1"></i>Retomar
+                                    <a href="{% url 'controle_jornada' servico_ativo.id 'retomar' %}" class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-700">
+                                        <i class="fas fa-play" aria-hidden="true"></i>Retomar
                                     </a>
                                 {% endif %}
                             </div>
@@ -101,132 +138,111 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 {% endif %}
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-light border-success">
-            <div class="card-body d-flex justify-content-between align-items-center">
+        <section class="rounded-3xl border border-mandik-100 bg-mandik-50 p-5 sm:p-6">
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h5 class="card-title mb-1 text-success">
-                        <i class="far fa-calendar-alt me-2"></i>Sua Disponibilidade
-                    </h5>
-                    <p class="card-text text-muted mb-0">Gerencie seus dias de folga e turnos de trabalho para receber propostas melhores.</p>
+                    <h2 class="text-lg font-bold text-mandik-800">
+                        <i class="far fa-calendar-alt mr-2" aria-hidden="true"></i>Sua Disponibilidade
+                    </h2>
+                    <p class="mt-1 text-sm text-mandik-700">Gerencie seus dias de folga e turnos de trabalho para receber propostas melhores.</p>
                 </div>
-                <a href="{% url 'disponibilidade:agenda_trabalhador' %}" class="btn btn-success">
-                    <i class="fas fa-calendar-edit me-2"></i>Gerenciar Agenda
+                <a href="{% url 'disponibilidade:agenda_trabalhador' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
+                    <i class="fas fa-calendar-edit" aria-hidden="true"></i>Gerenciar Agenda
                 </a>
             </div>
-        </div>
-    </div>
-</div>
+        </section>
 
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-center bg-primary text-white">
-            <div class="card-body">
-                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
-                <h5>{{ total_servicos }}</h5>
-                <p class="mb-0">Total de Serviços</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-center bg-warning text-dark">
-            <div class="card-body">
-                <i class="fas fa-clock fa-2x mb-2"></i>
-                <h5>{{ servicos_pendentes }}</h5>
-                <p class="mb-0">Pendentes</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-center bg-success text-white">
-            <div class="card-body">
-                <i class="fas fa-check fa-2x mb-2"></i>
-                <h5>{{ servicos_concluidos }}</h5>
-                <p class="mb-0">Concluídos</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-center bg-info text-white">
-            <div class="card-body">
-                <i class="fas fa-star fa-2x mb-2"></i>
-                <h5>{{ user.avaliacao_media|floatformat:1 }}</h5>
-                <p class="mb-0">Avaliação Média</p>
-            </div>
-        </div>
-    </div>
-</div>
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo de indicadores">
+            <article class="rounded-2xl bg-sky-600 p-5 text-white shadow-sm">
+                <i class="fas fa-clipboard-list text-xl" aria-hidden="true"></i>
+                <p class="mt-3 text-3xl font-extrabold">{{ total_servicos }}</p>
+                <p class="text-sm text-sky-100">Total de Servicos</p>
+            </article>
+            <article class="rounded-2xl bg-amber-400 p-5 text-slate-900 shadow-sm">
+                <i class="fas fa-clock text-xl" aria-hidden="true"></i>
+                <p class="mt-3 text-3xl font-extrabold">{{ servicos_pendentes }}</p>
+                <p class="text-sm text-amber-900">Pendentes</p>
+            </article>
+            <article class="rounded-2xl bg-emerald-600 p-5 text-white shadow-sm">
+                <i class="fas fa-check text-xl" aria-hidden="true"></i>
+                <p class="mt-3 text-3xl font-extrabold">{{ servicos_concluidos }}</p>
+                <p class="text-sm text-emerald-100">Concluidos</p>
+            </article>
+            <article class="rounded-2xl bg-cyan-600 p-5 text-white shadow-sm">
+                <i class="fas fa-star text-xl" aria-hidden="true"></i>
+                <p class="mt-3 text-3xl font-extrabold">{{ user.avaliacao_media|floatformat:1 }}</p>
+                <p class="text-sm text-cyan-100">Avaliacao Media</p>
+            </article>
+        </section>
 
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>Suas Propostas Recentes
-                </h5>
+        <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" aria-label="Propostas recentes">
+            <div class="border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-900">
+                    <i class="fas fa-list mr-2 text-mandik-600" aria-hidden="true"></i>Suas Propostas Recentes
+                </h2>
             </div>
-            <div class="card-body">
+
+            <div class="p-2 sm:p-4">
                 {% if servicos %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
                                 <tr>
-                                    <th>Contratante</th>
-                                    <th>Descrição</th>
-                                    <th>Data</th>
-                                    <th>Valor</th>
-                                    <th>Status</th>
-                                    <th>Ações</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Contratante</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Descricao</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Data</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Valor</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Acoes</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-slate-100 bg-white">
                                 {% for servico in servicos %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-user-circle fa-2x text-secondary me-2"></i>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-4 py-3 align-top">
+                                        <div class="flex items-start gap-3">
+                                            <i class="fas fa-user-circle text-2xl text-slate-400" aria-hidden="true"></i>
                                             <div>
-                                                <strong>{{ servico.contratante.get_full_name|default:servico.contratante.username }}</strong>
-                                                <br><small class="text-muted">{{ servico.contratante.telefone|default:"Sem telefone" }}</small>
+                                                <p class="text-sm font-semibold text-slate-900">{{ servico.contratante.get_full_name|default:servico.contratante.username }}</p>
+                                                <p class="text-xs text-slate-500">{{ servico.contratante.telefone|default:"Sem telefone" }}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
-                                        <div style="max-width: 200px;">
+                                    <td class="max-w-xs px-4 py-3 text-sm text-slate-700">
+                                        <div>
                                             {{ servico.descricao|truncatechars:80 }}
                                         </div>
                                     </td>
-                                    <td>{{ servico.data_servico|date:"d/m/Y" }}</td>
-                                    <td>R$ {{ servico.valor_acordado|floatformat:2 }}</td>
-                                    <td>
+                                    <td class="px-4 py-3 text-sm text-slate-700">{{ servico.data_servico|date:"d/m/Y" }}</td>
+                                    <td class="px-4 py-3 text-sm font-semibold text-slate-800">R$ {{ servico.valor_acordado|floatformat:2 }}</td>
+                                    <td class="px-4 py-3">
                                         {% if servico.status == 'pendente' %}
-                                            <span class="badge bg-warning">Pendente</span>
+                                            <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Pendente</span>
                                         {% elif servico.status == 'aceito' %}
-                                            <span class="badge bg-info">Aceito</span>
+                                            <span class="inline-flex rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-semibold text-cyan-800">Aceito</span>
                                         {% elif servico.status == 'concluido' %}
-                                            <span class="badge bg-success">Concluído</span>
+                                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Concluido</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">Cancelado</span>
+                                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">Cancelado</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        <a href="{% url 'detalhes_servico' servico.id %}" class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="fas fa-eye"></i>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-2">
+                                        <a href="{% url 'detalhes_servico' servico.id %}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-700 transition hover:bg-sky-100" aria-label="Ver detalhes do servico">
+                                            <i class="fas fa-eye" aria-hidden="true"></i>
                                         </a>
                                         {% if servico.status == 'pendente' %}
-                                            <a href="{% url 'aceitar_servico' servico.id %}" class="btn btn-sm btn-success me-1" onclick="return confirm('Deseja aceitar este serviço?')">
-                                                <i class="fas fa-check"></i>
+                                            <a href="{% url 'aceitar_servico' servico.id %}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white transition hover:bg-emerald-700" onclick="return confirm('Deseja aceitar este serviço?')" aria-label="Aceitar servico">
+                                                <i class="fas fa-check" aria-hidden="true"></i>
                                             </a>
-                                            <a href="{% url 'recusar_servico' servico.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Deseja recusar este serviço?')">
-                                                <i class="fas fa-times"></i>
+                                            <a href="{% url 'recusar_servico' servico.id %}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-rose-600 text-white transition hover:bg-rose-700" onclick="return confirm('Deseja recusar este serviço?')" aria-label="Recusar servico">
+                                                <i class="fas fa-times" aria-hidden="true"></i>
                                             </a>
                                         {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -234,17 +250,17 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-4">
-                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Nenhuma proposta de trabalho ainda</h5>
-                        <p class="text-muted">Complete seu perfil para receber mais propostas!</p>
-                        <a href="{% url 'perfil' %}" class="btn btn-success">
-                            <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                    <div class="px-4 py-10 text-center sm:px-6">
+                        <i class="fas fa-clipboard-list text-5xl text-slate-300" aria-hidden="true"></i>
+                        <h3 class="mt-4 text-lg font-bold text-slate-700">Nenhuma proposta de trabalho ainda</h3>
+                        <p class="mt-1 text-sm text-slate-500">Complete seu perfil para receber mais propostas!</p>
+                        <a href="{% url 'perfil' %}" class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
+                            <i class="fas fa-user-edit" aria-hidden="true"></i>Editar Perfil
                         </a>
                     </div>
                 {% endif %}
             </div>
-        </div>
+        </section>
     </div>
-</div>
+</section>
 {% endblock %}
