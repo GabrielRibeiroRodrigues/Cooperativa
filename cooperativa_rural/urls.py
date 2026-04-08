@@ -31,6 +31,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('contratos/', include('contratos.urls')),
+    path('disponibilidade/', include('disponibilidade.urls')),
 
     path("chat/", include("chat.urls")),
 ]
