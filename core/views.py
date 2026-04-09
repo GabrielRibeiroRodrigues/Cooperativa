@@ -475,6 +475,54 @@ def minhas_inscricoes(request):
 
 # --- ROTAS COMPARTILHADAS E AJAX (Sem Decorator) ---
 
+def _usuario_pode_avaliar_servico(servico, usuario):
+    if servico.status != 'concluido':
+        return False
+    if not hasattr(servico, 'contrato_formal') or servico.contrato_formal.status != 'encerrado':
+        return False
+    return usuario in (servico.contratante, servico.trabalhador)
+
+
+def _ja_avaliou_servico(servico, usuario):
+    return servico.avaliacoes.filter(avaliador=usuario).exists()
+
+
+@login_required
+def avaliar_servico(request, servico_id):
+    servico = get_object_or_404(Servico, id=servico_id)
+    if request.user != servico.contratante and request.user != servico.trabalhador and not request.user.is_superuser:
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+
+    if not _usuario_pode_avaliar_servico(servico, request.user):
+        messages.error(request, 'A avaliação só é liberada após o encerramento do contrato.')
+        return redirect('detalhes_servico', servico_id=servico.id)
+
+    if _ja_avaliou_servico(servico, request.user):
+        messages.warning(request, 'Você já avaliou este serviço.')
+        return redirect('detalhes_servico', servico_id=servico.id)
+
+    if request.method == 'POST':
+        form = AvaliacaoForm(request.POST)
+        if form.is_valid():
+            avaliacao = form.save(commit=False)
+            avaliacao.servico = servico
+            avaliacao.avaliador = request.user
+            avaliacao.save()
+            messages.success(request, 'Avaliação enviada!')
+            return redirect('detalhes_servico', servico_id=servico.id)
+        messages.error(request, 'Não foi possível enviar a avaliação.')
+    else:
+        form = AvaliacaoForm()
+
+    avaliado = servico.trabalhador if request.user == servico.contratante else servico.contratante
+    context = {
+        'servico': servico,
+        'avaliado': avaliado,
+        'form': form,
+    }
+    return render(request, 'core/avaliar.html', context)
+
 @login_required
 def detalhes_servico(request, servico_id):
     servico = get_object_or_404(Servico, id=servico_id)
@@ -486,34 +534,22 @@ def detalhes_servico(request, servico_id):
     mensagens = servico.mensagens.all()
     controles = servico.controles_jornada.all()
     
-    if request.method == 'POST':
-        if 'mensagem' in request.POST:
-            form_mensagem = MensagemForm(request.POST)
-            if form_mensagem.is_valid():
-                mensagem = form_mensagem.save(commit=False)
-                mensagem.servico = servico
-                mensagem.remetente = request.user
-                mensagem.save()
-                messages.success(request, 'Mensagem enviada!')
-                return redirect('detalhes_servico', servico_id=servico.id)
-        
-        elif 'avaliacao' in request.POST:
-            if servico.status == 'concluido' and request.user == servico.contratante:
-                form_avaliacao = AvaliacaoForm(request.POST)
-                if form_avaliacao.is_valid():
-                    avaliacao = form_avaliacao.save(commit=False)
-                    avaliacao.servico = servico
-                    avaliacao.avaliador = request.user
-                    avaliacao.save()
-                    messages.success(request, 'Avaliação enviada!')
-                    return redirect('detalhes_servico', servico_id=servico.id)
+    if request.method == 'POST' and 'mensagem' in request.POST:
+        form_mensagem = MensagemForm(request.POST)
+        if form_mensagem.is_valid():
+            mensagem = form_mensagem.save(commit=False)
+            mensagem.servico = servico
+            mensagem.remetente = request.user
+            mensagem.save()
+            messages.success(request, 'Mensagem enviada!')
+            return redirect('detalhes_servico', servico_id=servico.id)
     
     form_mensagem = MensagemForm()
-    form_avaliacao = AvaliacaoForm() if servico.status == 'concluido' and request.user == servico.contratante else None
+    pode_avaliar = _usuario_pode_avaliar_servico(servico, request.user) and not _ja_avaliou_servico(servico, request.user)
     context = {
         'servico': servico, 'mensagens': mensagens, 'controles': controles,
-        'form_mensagem': form_mensagem, 'form_avaliacao': form_avaliacao,
-        'pode_avaliar': servico.status == 'concluido' and request.user == servico.contratante and not hasattr(servico, 'avaliacao')
+        'form_mensagem': form_mensagem,
+        'pode_avaliar': pode_avaliar
     }
     return render(request, 'core/detalhes_servico.html', context)
 

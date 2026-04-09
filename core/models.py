@@ -42,6 +42,10 @@ class User(AbstractUser):
             MaxValueValidator(Decimal('5.00'))
         ]
     )
+    total_avaliacoes = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Total de Avaliações'
+    )
 
     cpf = models.CharField(
         max_length=14, 
@@ -60,7 +64,11 @@ class User(AbstractUser):
         if avaliacoes.exists():
             total = sum(av.nota for av in avaliacoes)
             self.avaliacao_media = Decimal(total / avaliacoes.count())
-            self.save()
+            self.total_avaliacoes = avaliacoes.count()
+        else:
+            self.avaliacao_media = Decimal('0.00')
+            self.total_avaliacoes = 0
+        self.save(update_fields=['avaliacao_media', 'total_avaliacoes'])
     
     class Meta:
         verbose_name = 'Usuário'
@@ -160,10 +168,10 @@ class Servico(models.Model):
 
 
 class Avaliacao(models.Model):
-    servico = models.OneToOneField(
+    servico = models.ForeignKey(
         Servico,
         on_delete=models.CASCADE,
-        related_name='avaliacao',
+        related_name='avaliacoes',
         verbose_name='Serviço'
     )
     avaliador = models.ForeignKey(

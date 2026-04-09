@@ -11,6 +11,7 @@
                 <p class="text-muted mb-2">{{ trabalhador.username }}</p>
                 <p class="mb-1"><strong>Telefone:</strong> {{ trabalhador.telefone|default:'Não informado' }}</p>
                 <p class="mb-1"><strong>Avaliação média:</strong> {{ trabalhador.avaliacao_media|floatformat:1 }}</p>
+                <p class="mb-1"><strong>Total de avaliações:</strong> {{ trabalhador.total_avaliacoes }}</p>
                 <p class="mb-3"><strong>Valor base:</strong> R$ {{ trabalhador.valor_diario|floatformat:2 }}/dia</p>
 
                 <div class="d-grid gap-2">

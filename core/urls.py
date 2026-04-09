@@ -44,6 +44,7 @@ urlpatterns = [
     
     # Serviços
     path('servico/<int:servico_id>/', views.detalhes_servico, name='detalhes_servico'),
+    path('servico/<int:servico_id>/avaliar/', views.avaliar_servico, name='avaliar_servico'),
     path('servico/<int:servico_id>/aceitar/', views.aceitar_servico, name='aceitar_servico'),
     path('servico/<int:servico_id>/recusar/', views.recusar_servico, name='recusar_servico'),
     
