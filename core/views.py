@@ -5,23 +5,41 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from django.db.models import Q, Avg
+from django.db.models import Q, Avg, Count
 from django.core.paginator import Paginator
 from datetime import timedelta, date
+from contratos.models import Contrato
 
 from .models import (
     User, Servico, Avaliacao, ControleJornada, Mensagem, TipoServico,
-    TrabalhadorServico, Demanda, InscricaoDemanda,
+    TrabalhadorServico, Demanda, InscricaoDemanda, Notificacao,
+    LogAcaoAdmin, Denuncia, TermoUso, Administrador
 )
 from .forms import (
     RegistroForm, ServicoForm, AvaliacaoForm, MensagemForm, PerfilForm,
     TipoServicoForm, TrabalhadorServicoForm, DemandaForm, InscricaoDemandaForm,
+    TermoUsoForm,
 )
 from decimal import Decimal
 import json
 
 # --- IMPORTAÇÃO DO DECORATOR ---
 from .decorators import role_required
+
+def _is_admin_custom(user):
+    return user.is_authenticated and (user.is_superuser or user.role == 'admin')
+
+
+def _log_admin_action(request, acao, detalhes, alvo_tipo='', alvo_id=None):
+    LogAcaoAdmin.objects.create(
+        administrador=request.user,
+        acao=acao,
+        detalhes=detalhes,
+        alvo_tipo=alvo_tipo,
+        alvo_id=alvo_id,
+        ip_origem=request.META.get('REMOTE_ADDR')
+    )
+
 
 # --- VIEWS PÚBLICAS E AUTENTICAÇÃO ---
 
@@ -552,6 +570,224 @@ def detalhes_servico(request, servico_id):
         'pode_avaliar': pode_avaliar
     }
     return render(request, 'core/detalhes_servico.html', context)
+
+
+@login_required
+def notificacoes(request):
+    notificacoes_qs = request.user.notificacoes.all().order_by('-data_criacao')
+    return render(request, 'core/notificacoes.html', {'notificacoes': notificacoes_qs})
+
+
+@login_required
+def notificacoes_polling(request):
+    limite = int(request.GET.get('limite', 10))
+    itens = request.user.notificacoes.all().order_by('-data_criacao')[:limite]
+    nao_lidas = request.user.notificacoes.filter(lida=False).count()
+    data = [
+        {
+            'id': n.id,
+            'titulo': n.titulo,
+            'mensagem': n.mensagem,
+            'tipo': n.tipo,
+            'lida': n.lida,
+            'data': n.data_criacao.strftime('%d/%m/%Y %H:%M'),
+            'link': n.link,
+        }
+        for n in itens
+    ]
+    return JsonResponse({'notificacoes': data, 'nao_lidas': nao_lidas})
+
+
+@login_required
+@require_POST
+def marcar_notificacoes_lidas(request):
+    request.user.notificacoes.filter(lida=False).update(lida=True)
+    return JsonResponse({'ok': True})
+
+
+@login_required
+def admin_dashboard(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+
+    context = {
+        'total_usuarios': User.objects.count(),
+        'total_contratos': Contrato.objects.count(),
+        'demandas_ativas': Demanda.objects.filter(status='aberta').count(),
+        'denuncias_pendentes': Denuncia.objects.filter(status='pendente').count(),
+        'usuarios_suspendidos': User.objects.filter(is_active=False).count(),
+        'total_logs_admin': LogAcaoAdmin.objects.count(),
+    }
+    return render(request, 'core/admin/dashboard.html', context)
+
+
+@login_required
+def admin_usuarios(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    usuarios = User.objects.all().order_by('-date_joined')
+    return render(request, 'core/admin/usuarios.html', {'usuarios': usuarios})
+
+
+@login_required
+@require_POST
+def admin_usuario_toggle_status(request, user_id):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    usuario = get_object_or_404(User, id=user_id)
+    if usuario == request.user:
+        messages.error(request, 'Você não pode suspender sua própria conta.')
+        return redirect('admin_usuarios')
+
+    usuario.is_active = not usuario.is_active
+    usuario.save(update_fields=['is_active'])
+    if usuario.is_active:
+        acao = 'reativar_usuario'
+        msg = f'Usuário {usuario.username} reativado'
+    else:
+        acao = 'suspender_usuario'
+        msg = f'Usuário {usuario.username} suspenso'
+    _log_admin_action(request, acao, msg, 'User', usuario.id)
+    messages.success(request, msg + '.')
+    return redirect('admin_usuarios')
+
+
+@login_required
+def admin_contratos(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    contratos = Contrato.objects.select_related('contratante', 'trabalhador', 'servico').order_by('-data_criacao')
+    return render(request, 'core/admin/contratos.html', {'contratos': contratos})
+
+
+@login_required
+@require_POST
+def admin_contrato_encerrar(request, contrato_id):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    contrato = get_object_or_404(Contrato, id=contrato_id)
+    contrato.status = 'encerrado'
+    contrato.save(update_fields=['status', 'data_atualizacao'])
+    _log_admin_action(request, 'alterar_contrato', f'Contrato {contrato.numero} encerrado manualmente', 'Contrato', contrato.id)
+    Notificacao.objects.create(
+        usuario=contrato.contratante,
+        titulo='Contrato encerrado',
+        mensagem=f'O contrato {contrato.numero} foi encerrado pelo administrador.',
+        tipo='contrato',
+        link=f'/contratos/{contrato.id}/'
+    )
+    Notificacao.objects.create(
+        usuario=contrato.trabalhador,
+        titulo='Contrato encerrado',
+        mensagem=f'O contrato {contrato.numero} foi encerrado pelo administrador.',
+        tipo='contrato',
+        link=f'/contratos/{contrato.id}/'
+    )
+    messages.success(request, 'Contrato encerrado com sucesso.')
+    return redirect('admin_contratos')
+
+
+@login_required
+def admin_denuncias(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    denuncias = Denuncia.objects.select_related('denunciante', 'denunciado', 'contrato').order_by('status', '-data_criacao')
+    return render(request, 'core/admin/denuncias.html', {'denuncias': denuncias})
+
+
+@login_required
+@require_POST
+def admin_denuncia_acao(request, denuncia_id, acao):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    denuncia = get_object_or_404(Denuncia, id=denuncia_id)
+    observacao = request.POST.get('observacao', '').strip()
+    denuncia.observacao_admin = observacao
+    denuncia.data_resolucao = timezone.now()
+    alvo = denuncia.denunciado
+
+    if acao == 'suspender':
+        alvo.is_active = False
+        alvo.save(update_fields=['is_active'])
+        denuncia.status = 'resolvida'
+        _log_admin_action(request, 'resolver_denuncia', f'Denúncia {denuncia.id} resolvida com suspensão do usuário {alvo.username}', 'Denuncia', denuncia.id)
+        Notificacao.objects.create(
+            usuario=alvo,
+            titulo='Conta suspensa',
+            mensagem='Sua conta foi suspensa após análise de denúncia.',
+            tipo='denuncia',
+            link='/perfil/'
+        )
+    elif acao == 'ignorar':
+        denuncia.status = 'ignorada'
+        _log_admin_action(request, 'resolver_denuncia', f'Denúncia {denuncia.id} ignorada', 'Denuncia', denuncia.id)
+    else:
+        messages.error(request, 'Ação inválida.')
+        return redirect('admin_denuncias')
+
+    denuncia.save(update_fields=['status', 'observacao_admin', 'data_resolucao'])
+    messages.success(request, 'Ação executada com sucesso.')
+    return redirect('admin_denuncias')
+
+
+@login_required
+def admin_termos(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = TermoUsoForm(request.POST)
+        if form.is_valid():
+            termo = form.save(commit=False)
+            termo.criado_por = request.user
+            if termo.ativo:
+                TermoUso.objects.filter(ativo=True).update(ativo=False)
+            termo.save()
+            _log_admin_action(request, 'criar_termo', f'Termo {termo.versao} criado', 'TermoUso', termo.id)
+            messages.success(request, 'Termo de uso salvo com sucesso.')
+            return redirect('admin_termos')
+    else:
+        form = TermoUsoForm()
+
+    termos = TermoUso.objects.all().order_by('-data_publicacao')
+    return render(request, 'core/admin/termos.html', {'form': form, 'termos': termos})
+
+
+@login_required
+def admin_tipos_servico(request):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    tipos = TipoServico.objects.all().order_by('nome')
+    return render(request, 'core/admin/tipos_servico.html', {'tipos': tipos})
+
+
+@login_required
+@require_POST
+def admin_tipo_servico_toggle_risco(request, tipo_id):
+    if not _is_admin_custom(request.user):
+        messages.error(request, 'Acesso negado.')
+        return redirect('home')
+    tipo = get_object_or_404(TipoServico, id=tipo_id)
+    tipo.e_servico_risco = not tipo.e_servico_risco
+    tipo.save(update_fields=['e_servico_risco'])
+    _log_admin_action(
+        request,
+        'editar_tipo_servico',
+        f"Tipo de serviço '{tipo.nome}' alterado para risco={tipo.e_servico_risco}",
+        'TipoServico',
+        tipo.id
+    )
+    messages.success(request, 'Flag de risco atualizada.')
+    return redirect('admin_tipos_servico')
 
 @login_required
 def detalhe_demanda(request, demanda_id):

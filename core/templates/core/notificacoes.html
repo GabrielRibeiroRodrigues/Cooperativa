@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Notificações - Cooperativa Rural{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0"><i class="fas fa-bell me-2"></i>Notificações</h1>
+    <button class="btn btn-outline-secondary btn-sm" id="btn-marcar-lidas">
+        <i class="fas fa-check-double me-1"></i>Marcar todas como lidas
+    </button>
+</div>
+
+<div class="card">
+    <div class="list-group list-group-flush" id="lista-notificacoes">
+        {% for n in notificacoes %}
+            <div class="list-group-item {% if not n.lida %}list-group-item-warning{% endif %}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ n.titulo }}</h6>
+                    <small>{{ n.data_criacao|date:"d/m/Y H:i" }}</small>
+                </div>
+                <p class="mb-1">{{ n.mensagem }}</p>
+                {% if n.link %}
+                    <a href="{{ n.link }}" class="small">Abrir</a>
+                {% endif %}
+            </div>
+        {% empty %}
+            <div class="list-group-item text-muted">Nenhuma notificação.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+async function atualizarNotificacoes() {
+    const resposta = await fetch("{% url 'notificacoes_polling' %}");
+    if (!resposta.ok) return;
+    const payload = await resposta.json();
+    const lista = document.getElementById('lista-notificacoes');
+    if (!payload.notificacoes.length) {
+        lista.innerHTML = '<div class="list-group-item text-muted">Nenhuma notificação.</div>';
+        return;
+    }
+    lista.innerHTML = payload.notificacoes.map(n => `
+        <div class="list-group-item ${!n.lida ? 'list-group-item-warning' : ''}">
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${n.titulo}</h6>
+                <small>${n.data}</small>
+            </div>
+            <p class="mb-1">${n.mensagem}</p>
+            ${n.link ? `<a href="${n.link}" class="small">Abrir</a>` : ''}
+        </div>
+    `).join('');
+}
+
+document.getElementById('btn-marcar-lidas').addEventListener('click', async () => {
+    const resposta = await fetch("{% url 'marcar_notificacoes_lidas' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    });
+    if (resposta.ok) atualizarNotificacoes();
+});
+
+setInterval(atualizarNotificacoes, 5000);
+</script>
+{% endblock %}

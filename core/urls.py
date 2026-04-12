@@ -13,6 +13,9 @@ urlpatterns = [
     path('registro/trabalhador/', views.registro_trabalhador_view, name='registro_trabalhador'),
 
     path('perfil/', views.perfil_view, name='perfil'),
+    path('notificacoes/', views.notificacoes, name='notificacoes'),
+    path('notificacoes/polling/', views.notificacoes_polling, name='notificacoes_polling'),
+    path('notificacoes/marcar-lidas/', views.marcar_notificacoes_lidas, name='marcar_notificacoes_lidas'),
     
     # Painéis
     path('painel/contratante/', views.painel_contratante, name='painel_contratante'),
@@ -51,4 +54,16 @@ urlpatterns = [
     # Controle de jornada
     path('jornada/<int:servico_id>/status/', views.status_jornada_ajax, name='status_jornada_ajax'),
     path('jornada/<int:servico_id>/<str:acao>/', views.controle_jornada, name='controle_jornada'),
+
+    # Admin customizado
+    path('painel-admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('painel-admin/usuarios/', views.admin_usuarios, name='admin_usuarios'),
+    path('painel-admin/usuarios/<int:user_id>/toggle-status/', views.admin_usuario_toggle_status, name='admin_usuario_toggle_status'),
+    path('painel-admin/contratos/', views.admin_contratos, name='admin_contratos'),
+    path('painel-admin/contratos/<int:contrato_id>/encerrar/', views.admin_contrato_encerrar, name='admin_contrato_encerrar'),
+    path('painel-admin/denuncias/', views.admin_denuncias, name='admin_denuncias'),
+    path('painel-admin/denuncias/<int:denuncia_id>/<str:acao>/', views.admin_denuncia_acao, name='admin_denuncia_acao'),
+    path('painel-admin/termos/', views.admin_termos, name='admin_termos'),
+    path('painel-admin/tipos-servico/', views.admin_tipos_servico, name='admin_tipos_servico'),
+    path('painel-admin/tipos-servico/<int:tipo_id>/toggle-risco/', views.admin_tipo_servico_toggle_risco, name='admin_tipo_servico_toggle_risco'),
 ]

@@ -82,6 +82,21 @@
                                 </span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'notificacoes' %}">
+                                <i class="fas fa-bell me-1"></i>Notificações
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="badge-notificacoes" style="display: none;">
+                                    0
+                                </span>
+                            </a>
+                        </li>
+                        {% if user.role == 'admin' or user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                                <i class="fas fa-shield-alt me-1"></i>Painel Admin
+                            </a>
+                        </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">
@@ -147,6 +162,27 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% if user.is_authenticated %}
+    <script>
+    async function atualizarBadgeNotificacoes() {
+        try {
+            const resposta = await fetch("{% url 'notificacoes_polling' %}?limite=1");
+            if (!resposta.ok) return;
+            const payload = await resposta.json();
+            const badge = document.getElementById('badge-notificacoes');
+            if (!badge) return;
+            if (payload.nao_lidas > 0) {
+                badge.style.display = 'inline';
+                badge.textContent = payload.nao_lidas > 99 ? '99+' : payload.nao_lidas;
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {}
+    }
+    atualizarBadgeNotificacoes();
+    setInterval(atualizarBadgeNotificacoes, 5000);
+    </script>
+    {% endif %}
     {% block scripts %}
     {% endblock %}
 </body>

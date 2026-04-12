@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin - Usuários{% endblock %}
+
+{% block content %}
+<h1 class="h4 mb-3"><i class="fas fa-users me-2"></i>Gestão de Usuários</h1>
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Usuário</th>
+                <th>Nome</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.get_full_name|default:"-" }}</td>
+                <td>{{ u.get_role_display }}</td>
+                <td>
+                    {% if u.is_active %}
+                        <span class="badge bg-success">Ativo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Suspenso</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u != user %}
+                    <form method="post" action="{% url 'admin_usuario_toggle_status' u.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                            {% if u.is_active %}Suspender{% else %}Reativar{% endif %}
+                        </button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

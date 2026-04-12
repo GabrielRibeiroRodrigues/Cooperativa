@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
-from .models import User, Servico, Avaliacao, ControleJornada, Mensagem
+from .models import (
+    User, Servico, Avaliacao, ControleJornada, Mensagem, Notificacao,
+    Administrador, LogAcaoAdmin, Denuncia, TermoUso, TipoServico
+)
 
 # Register your models here.
 
@@ -121,3 +124,40 @@ class MensagemAdmin(admin.ModelAdmin):
     def conteudo_resumido(self, obj):
         return obj.conteudo[:50] + '...' if len(obj.conteudo) > 50 else obj.conteudo
     conteudo_resumido.short_description = 'Mensagem'
+
+
+@admin.register(Notificacao)
+class NotificacaoAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'titulo', 'tipo', 'lida', 'data_criacao']
+    list_filter = ['tipo', 'lida', 'data_criacao']
+    search_fields = ['usuario__username', 'titulo', 'mensagem']
+
+
+@admin.register(Administrador)
+class AdministradorAdmin(admin.ModelAdmin):
+    list_display = ['usuario', 'ativo', 'data_designacao']
+    list_filter = ['ativo']
+    search_fields = ['usuario__username', 'usuario__first_name', 'usuario__last_name']
+
+
+@admin.register(LogAcaoAdmin)
+class LogAcaoAdminAdmin(admin.ModelAdmin):
+    list_display = ['administrador', 'acao', 'alvo_tipo', 'alvo_id', 'data_acao']
+    list_filter = ['acao', 'data_acao']
+    search_fields = ['administrador__username', 'detalhes', 'alvo_tipo']
+    readonly_fields = ['administrador', 'acao', 'detalhes', 'alvo_tipo', 'alvo_id', 'ip_origem', 'data_acao']
+
+
+@admin.register(Denuncia)
+class DenunciaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'denunciante', 'denunciado', 'motivo', 'status', 'data_criacao']
+    list_filter = ['status', 'data_criacao']
+    search_fields = ['denunciante__username', 'denunciado__username', 'motivo', 'descricao']
+    readonly_fields = ['data_criacao', 'data_resolucao']
+
+
+@admin.register(TermoUso)
+class TermoUsoAdmin(admin.ModelAdmin):
+    list_display = ['versao', 'ativo', 'criado_por', 'data_publicacao']
+    list_filter = ['ativo', 'data_publicacao']
+    search_fields = ['versao', 'conteudo']

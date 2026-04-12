@@ -532,3 +532,161 @@ class InscricaoDemanda(models.Model):
         verbose_name_plural = 'Inscrições em Demandas'
         unique_together = ['demanda', 'trabalhador']
         ordering = ['-data_inscricao']
+
+
+class Notificacao(models.Model):
+    TIPO_CHOICES = [
+        ('sistema', 'Sistema'),
+        ('contrato', 'Contrato'),
+        ('servico', 'Serviço'),
+        ('denuncia', 'Denúncia'),
+        ('avaliacao', 'Avaliação'),
+    ]
+
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notificacoes',
+        verbose_name='Usuário'
+    )
+    titulo = models.CharField(max_length=120, verbose_name='Título')
+    mensagem = models.TextField(verbose_name='Mensagem')
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES,
+        default='sistema',
+        verbose_name='Tipo'
+    )
+    lida = models.BooleanField(default=False, verbose_name='Lida')
+    link = models.CharField(max_length=255, blank=True, default='', verbose_name='Link')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Criação')
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.titulo}"
+
+    class Meta:
+        verbose_name = 'Notificação'
+        verbose_name_plural = 'Notificações'
+        ordering = ['lida', '-data_criacao']
+
+
+class Administrador(models.Model):
+    usuario = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='administrador',
+        verbose_name='Usuário'
+    )
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+    data_designacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Designação')
+
+    def __str__(self):
+        return f"Admin: {self.usuario.get_full_name() or self.usuario.username}"
+
+    class Meta:
+        verbose_name = 'Administrador'
+        verbose_name_plural = 'Administradores'
+
+
+class LogAcaoAdmin(models.Model):
+    ACAO_CHOICES = [
+        ('suspender_usuario', 'Suspender Usuário'),
+        ('reativar_usuario', 'Reativar Usuário'),
+        ('alterar_contrato', 'Alterar Contrato'),
+        ('resolver_denuncia', 'Resolver Denúncia'),
+        ('criar_termo', 'Criar Termo'),
+        ('editar_tipo_servico', 'Editar Tipo de Serviço'),
+    ]
+
+    administrador = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='logs_admin',
+        verbose_name='Administrador'
+    )
+    acao = models.CharField(max_length=30, choices=ACAO_CHOICES, verbose_name='Ação')
+    detalhes = models.TextField(verbose_name='Detalhes')
+    alvo_tipo = models.CharField(max_length=40, blank=True, default='', verbose_name='Tipo do Alvo')
+    alvo_id = models.PositiveIntegerField(null=True, blank=True, verbose_name='ID do Alvo')
+    ip_origem = models.GenericIPAddressField(null=True, blank=True, verbose_name='IP de Origem')
+    data_acao = models.DateTimeField(auto_now_add=True, verbose_name='Data da Ação')
+
+    def __str__(self):
+        return f"{self.administrador.username} - {self.get_acao_display()}"
+
+    class Meta:
+        verbose_name = 'Log de Ação Admin'
+        verbose_name_plural = 'Logs de Ações Admin'
+        ordering = ['-data_acao']
+
+
+class Denuncia(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('em_analise', 'Em Análise'),
+        ('resolvida', 'Resolvida'),
+        ('ignorada', 'Ignorada'),
+    ]
+
+    denunciante = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='denuncias_feitas',
+        verbose_name='Denunciante'
+    )
+    denunciado = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='denuncias_recebidas',
+        verbose_name='Denunciado'
+    )
+    contrato = models.ForeignKey(
+        'contratos.Contrato',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='denuncias',
+        verbose_name='Contrato'
+    )
+    motivo = models.CharField(max_length=120, verbose_name='Motivo')
+    descricao = models.TextField(verbose_name='Descrição')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pendente',
+        verbose_name='Status'
+    )
+    observacao_admin = models.TextField(blank=True, default='', verbose_name='Observação do Admin')
+    data_criacao = models.DateTimeField(auto_now_add=True, verbose_name='Data da Denúncia')
+    data_resolucao = models.DateTimeField(null=True, blank=True, verbose_name='Data de Resolução')
+
+    def __str__(self):
+        return f"Denúncia {self.id} - {self.denunciante.username} -> {self.denunciado.username}"
+
+    class Meta:
+        verbose_name = 'Denúncia'
+        verbose_name_plural = 'Denúncias'
+        ordering = ['status', '-data_criacao']
+
+
+class TermoUso(models.Model):
+    versao = models.CharField(max_length=20, unique=True, verbose_name='Versão')
+    conteudo = models.TextField(verbose_name='Conteúdo')
+    ativo = models.BooleanField(default=False, verbose_name='Ativo')
+    data_publicacao = models.DateTimeField(auto_now_add=True, verbose_name='Data de Publicação')
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='termos_criados',
+        verbose_name='Criado por'
+    )
+
+    def __str__(self):
+        return f"Termo {self.versao}"
+
+    class Meta:
+        verbose_name = 'Termo de Uso'
+        verbose_name_plural = 'Termos de Uso'
+        ordering = ['-data_publicacao']

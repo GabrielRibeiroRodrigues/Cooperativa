@@ -11,6 +11,8 @@ from .models import (
     TrabalhadorServico,
     Demanda,
     InscricaoDemanda,
+    Denuncia,
+    TermoUso,
 )
 from decimal import Decimal
 
@@ -324,4 +326,33 @@ class InscricaoDemandaForm(forms.ModelForm):
                 'rows': 4,
                 'placeholder': 'Apresente-se e explique por que você é a pessoa certa para este serviço...',
             }),
+        }
+
+
+class DenunciaForm(forms.ModelForm):
+    class Meta:
+        model = Denuncia
+        fields = ['denunciado', 'contrato', 'motivo', 'descricao']
+        widgets = {
+            'denunciado': forms.Select(attrs={'class': 'form-select'}),
+            'contrato': forms.Select(attrs={'class': 'form-select'}),
+            'motivo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Descumprimento de contrato'}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        usuario = kwargs.pop('usuario', None)
+        super().__init__(*args, **kwargs)
+        if usuario:
+            self.fields['denunciado'].queryset = User.objects.exclude(id=usuario.id)
+
+
+class TermoUsoForm(forms.ModelForm):
+    class Meta:
+        model = TermoUso
+        fields = ['versao', 'conteudo', 'ativo']
+        widgets = {
+            'versao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 2026.1'}),
+            'conteudo': forms.Textarea(attrs={'class': 'form-control', 'rows': 12}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
