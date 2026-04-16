@@ -108,8 +108,8 @@
             <button type="button"
                     class="js-toggle-disponivel flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all {% if item.disponivel_agora %}bg-mandik-100 text-mandik-700 border border-mandik-200{% else %}bg-slate-100 text-slate-500 border border-slate-200{% endif %}"
                     data-id="{{ item.id }}">
-              <span class="w-1.5 h-1.5 rounded-full {% if item.disponivel_agora %}bg-mandik-500{% else %}bg-slate-400{% endif %}"></span>
-              {% if item.disponivel_agora %}Disponível{% else %}Indisponível{% endif %}
+              <span class="js-dot w-1.5 h-1.5 rounded-full {% if item.disponivel_agora %}bg-mandik-500{% else %}bg-slate-400{% endif %}"></span>
+              <span class="js-label">{% if item.disponivel_agora %}Disponível{% else %}Indisponível{% endif %}</span>
             </button>
           </div>
           <div class="mt-3 ml-13 flex items-center gap-2 pl-[52px]">
@@ -156,15 +156,18 @@ document.querySelectorAll('.js-toggle-disponivel').forEach(function (btn) {
     .then(response => response.json())
     .then(data => {
       if (!data.ok) return;
-      const dot = this.querySelector('span');
+      const dot = this.querySelector('.js-dot');
+      const label = this.querySelector('.js-label');
       if (data.disponivel_agora) {
-        this.className = this.className.replace('bg-slate-100 text-slate-500 border border-slate-200', 'bg-mandik-100 text-mandik-700 border border-mandik-200');
-        dot.className = dot.className.replace('bg-slate-400', 'bg-mandik-500');
-        this.childNodes[this.childNodes.length - 1].textContent = 'Disponível';
+        this.classList.remove('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        this.classList.add('bg-mandik-100', 'text-mandik-700', 'border-mandik-200');
+        dot.classList.remove('bg-slate-400'); dot.classList.add('bg-mandik-500');
+        label.textContent = 'Disponível';
       } else {
-        this.className = this.className.replace('bg-mandik-100 text-mandik-700 border border-mandik-200', 'bg-slate-100 text-slate-500 border border-slate-200');
-        dot.className = dot.className.replace('bg-mandik-500', 'bg-slate-400');
-        this.childNodes[this.childNodes.length - 1].textContent = 'Indisponível';
+        this.classList.remove('bg-mandik-100', 'text-mandik-700', 'border-mandik-200');
+        this.classList.add('bg-slate-100', 'text-slate-500', 'border-slate-200');
+        dot.classList.remove('bg-mandik-500'); dot.classList.add('bg-slate-400');
+        label.textContent = 'Indisponível';
       }
     });
   });

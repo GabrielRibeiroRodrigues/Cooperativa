@@ -4,14 +4,15 @@
 
 {% block content %}
 <!-- Page Header -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-start justify-between mb-6 gap-4">
   <div>
-    <h1 class="text-2xl font-bold text-slate-800">Tipos de Serviço</h1>
-    <p class="text-sm text-slate-500 mt-0.5">Categorias de serviços disponíveis na plataforma</p>
+    <p class="text-xs font-bold uppercase tracking-[0.18em] text-mandik-600">Administração</p>
+    <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Tipos de Serviço</h1>
+    <p class="mt-1 text-sm text-slate-500">Categorias de serviços disponíveis na plataforma</p>
   </div>
   {% if user.role == 'contratante' %}
   <a href="{% url 'criar_tipo_servico' %}"
-     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold shadow-sm transition-all">
+     class="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold shadow-sm transition-all">
     <i class="fas fa-plus"></i>
     Novo Tipo
   </a>
@@ -19,8 +20,10 @@
 </div>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-  <div class="bg-mandik-600 px-6 py-4">
-    <h2 class="text-base font-bold text-white flex items-center gap-2">
+  <div class="relative overflow-hidden bg-gradient-to-r from-mandik-700 to-mandik-900 px-6 py-4">
+    <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=50"
+         alt="" class="absolute inset-0 w-full h-full object-cover opacity-15" loading="lazy">
+    <h2 class="relative text-base font-bold text-white flex items-center gap-2">
       <i class="fas fa-tags"></i>
       Tipos Cadastrados
     </h2>
