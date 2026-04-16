@@ -1,142 +1,194 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Buscar Trabalhadores - Cooperativa Rural{% endblock %}
+{% block title %}Buscar Trabalhadores — Mandik{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1><i class="fas fa-search me-2"></i>Buscar Trabalhadores</h1>
-        <p class="text-muted">Encontre trabalhadores qualificados para seu trabalho rural</p>
-    </div>
-</div>
+<div class="space-y-6">
 
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <form method="GET" class="row g-3">
-                    <div class="col-md-4">
-                        <label for="q" class="form-label">Nome do trabalhador</label>
-                        <input type="text" class="form-control" id="q" name="q" value="{{ query }}" placeholder="Digite o nome...">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="valor_min" class="form-label">Valor mínimo (R$)</label>
-                        <input type="number" class="form-control" id="valor_min" name="valor_min" value="{{ valor_min }}" step="0.01">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="valor_max" class="form-label">Valor máximo (R$)</label>
-                        <input type="number" class="form-control" id="valor_max" name="valor_max" value="{{ valor_max }}" step="0.01">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-search me-2"></i>Buscar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <!-- ── Page header ── -->
+    <div>
+        <p class="text-xs font-bold uppercase tracking-[0.18em] text-mandik-600">Marketplace</p>
+        <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Buscar Trabalhadores</h1>
+        <p class="mt-1 text-sm text-slate-500">Encontre profissionais rurais qualificados para o seu trabalho</p>
     </div>
-</div>
 
-<div class="row">
-    {% if trabalhadores %}
-        {% for trabalhador in trabalhadores %}
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 trabalhador-card">
-                <div class="card-body">
-                    <div class="text-center mb-3">
-                        <i class="fas fa-user-circle fa-4x text-success"></i>
+    <!-- ── Search bar ── -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <form method="GET" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="q" class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Nome do trabalhador</label>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-search text-slate-400 text-xs"></i>
                     </div>
-                    <h5 class="card-title text-center">
-                        {{ trabalhador.get_full_name|default:trabalhador.username }}
-                    </h5>
-                    <div class="perfil-rating text-center mb-3">
-                        {% if trabalhador.avaliacao_media > 0 %}
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= trabalhador.avaliacao_media|floatformat:0|add:0 %}
-                                    <i class="fas fa-star text-warning"></i>
-                                {% elif forloop.counter <= trabalhador.avaliacao_media|floatformat:0|add:1 and trabalhador.avaliacao_media|floatformat:1|slice:"-1" != "0" %}
-                                    <i class="fas fa-star-half-alt text-warning"></i>
-                                {% else %}
-                                    <i class="far fa-star text-muted"></i>
-                                {% endif %}
-                            {% endfor %}
-                            <span class="ms-2 text-muted">({{ trabalhador.avaliacao_media|floatformat:1 }})</span>
-                        {% else %}
-                            <span class="text-muted">Sem avaliações ainda</span>
-                        {% endif %}
-                    </div>
-                    <div class="text-center">
-                        <div class="mb-2">
-                            <i class="fas fa-money-bill text-success me-2"></i>
-                            <strong>R$ {{ trabalhador.valor_diario|floatformat:2 }}/dia</strong>
-                        </div>
-                        {% if trabalhador.telefone %}
-                        <div class="mb-2">
-                            <i class="fas fa-phone text-info me-2"></i>
-                            <small>{{ trabalhador.telefone }}</small>
-                        </div>
-                        {% endif %}
-                        <div class="mb-3">
-                            <small class="text-muted">
-                                <i class="fas fa-clipboard-list me-1"></i>
-                                {{ trabalhador.servicos_trabalhados.count }} trabalhos realizados
-                            </small>
-                        </div>
-                        <div class="btn-group w-100">
-                            <a href="{% url 'detalhes_trabalhador' trabalhador.id %}" class="btn btn-success btn-sm">
-                                <i class="fas fa-eye me-1"></i>Perfil
-                            </a>
-                            <a href="{% url 'disponibilidade:consultar_agenda' trabalhador.id %}" class="btn btn-outline-success btn-sm">
-                                <i class="fas fa-calendar-alt me-1"></i>Agenda
-                            </a>
-                        </div>
-                    </div>
+                    <input type="text" id="q" name="q" value="{{ query }}" placeholder="Digite o nome..."
+                           class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-8 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
                 </div>
             </div>
-        </div>
-        {% endfor %}
-        
-        <!-- Paginação -->
-        {% if trabalhadores.has_other_pages %}
-        <div class="col-12">
-            <nav aria-label="Navegação de páginas">
-                <ul class="pagination justify-content-center">
-                    {% if trabalhadores.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ trabalhadores.previous_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">Anterior</a>
-                        </li>
-                    {% endif %}
-                    
-                    {% for num in trabalhadores.paginator.page_range %}
-                        {% if trabalhadores.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > trabalhadores.number|add:'-3' and num < trabalhadores.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if trabalhadores.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ trabalhadores.next_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}">Próxima</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
-    {% else %}
-        <div class="col-12">
-            <div class="text-center py-5">
-                <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">Nenhum trabalhador encontrado</h5>
-                <p class="text-muted">Tente ajustar os filtros de busca</p>
+            <div>
+                <label for="valor_min" class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Valor mínimo (R$)</label>
+                <input type="number" id="valor_min" name="valor_min" value="{{ valor_min }}" step="0.01" placeholder="0,00"
+                       class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
             </div>
-        </div>
+            <div>
+                <label for="valor_max" class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Valor máximo (R$)</label>
+                <input type="number" id="valor_max" name="valor_max" value="{{ valor_max }}" step="0.01" placeholder="Sem limite"
+                       class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
+            </div>
+            <div class="flex items-end">
+                <button type="submit"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-mandik-600/20 transition hover:bg-mandik-700 focus:outline-none">
+                    <i class="fas fa-search text-xs"></i>
+                    Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Results ── -->
+    {% if trabalhadores %}
+
+    <!-- Results count -->
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-slate-500">
+            <span class="font-bold text-slate-900">{{ trabalhadores.paginator.count }}</span>
+            trabalhador{% if trabalhadores.paginator.count != 1 %}es{% endif %} encontrado{% if trabalhadores.paginator.count != 1 %}s{% endif %}
+            {% if query %}<span class="ml-1 text-slate-400">para "<strong class="text-slate-700">{{ query }}</strong>"</span>{% endif %}
+        </p>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% for trabalhador in trabalhadores %}
+        <article class="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-mandik-200 hover:shadow-lg">
+
+            <!-- Card header with gradient bg + avatar -->
+            {% with img_ids="1500937386664-56d1dfef3854,1625246333195-78d9c38ad449,1574943320219-553eb213f72d,1444858291040-58f756a3bdd6,1464226184884-fa280b87c399,1416879595882-3373a0480b5b,1560493676-04071c5f467b,1511352015382-902404c4ec56,1598301257982-0cf014dabbcd,1592982537447-7440770cbfc9" %}
+            {% with idx=forloop.counter0|divisibleby:1 %}
+            <div class="relative h-28 bg-gradient-to-br from-mandik-700 to-mandik-900 overflow-hidden">
+                <!-- Varied background photos based on worker index -->
+                {% if forloop.counter|divisibleby:5 %}
+                <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition duration-700" loading="lazy">
+                {% elif forloop.counter|divisibleby:4 %}
+                <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition duration-700" loading="lazy">
+                {% elif forloop.counter|divisibleby:3 %}
+                <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition duration-700" loading="lazy">
+                {% elif forloop.counter|divisibleby:2 %}
+                <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition duration-700" loading="lazy">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition duration-700" loading="lazy">
+                {% endif %}
+                <!-- Avatar -->
+                <div class="absolute -bottom-7 left-5 flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-white bg-mandik-100 text-mandik-700 text-xl font-extrabold shadow-lg">
+                    {{ trabalhador.get_full_name|default:trabalhador.username|slice:":1"|upper }}
+                </div>
+            </div>
+            {% endwith %}
+            {% endwith %}
+
+            <!-- Card body -->
+            <div class="flex flex-1 flex-col p-5 pt-10">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-tight">
+                            {{ trabalhador.get_full_name|default:trabalhador.username }}
+                        </h3>
+                        <!-- Rating -->
+                        <div class="mt-1 flex items-center gap-1">
+                            {% if trabalhador.avaliacao_media > 0 %}
+                                <div class="flex gap-0.5">
+                                    {% for i in "12345" %}
+                                        <i class="fas fa-star text-amber-400 text-[11px]"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="text-xs font-semibold text-slate-700">{{ trabalhador.avaliacao_media|floatformat:1 }}</span>
+                            {% else %}
+                                <span class="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">Sem avaliações</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Price badge -->
+                    <div class="shrink-0 rounded-xl bg-mandik-50 px-3 py-1.5 text-center">
+                        <p class="text-base font-extrabold text-mandik-700 leading-tight">R$ {{ trabalhador.valor_diario|floatformat:2 }}</p>
+                        <p class="text-[10px] font-semibold text-mandik-500">por dia</p>
+                    </div>
+                </div>
+
+                <!-- Info pills -->
+                <div class="mt-4 flex flex-wrap gap-2">
+                    {% if trabalhador.telefone %}
+                    <span class="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-600">
+                        <i class="fas fa-phone text-[10px] text-mandik-500"></i>
+                        {{ trabalhador.telefone }}
+                    </span>
+                    {% endif %}
+                    <span class="flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-600">
+                        <i class="fas fa-clipboard-check text-[10px] text-mandik-500"></i>
+                        {{ trabalhador.servicos_trabalhados.count }} serviço{% if trabalhador.servicos_trabalhados.count != 1 %}s{% endif %}
+                    </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-auto pt-4 grid grid-cols-2 gap-2">
+                    <a href="{% url 'detalhes_trabalhador' trabalhador.id %}"
+                       class="flex items-center justify-center gap-1.5 rounded-xl bg-mandik-600 px-3 py-2.5 text-sm font-bold text-white no-underline transition hover:bg-mandik-700">
+                        <i class="fas fa-user text-xs"></i>
+                        Ver Perfil
+                    </a>
+                    <a href="{% url 'disponibilidade:consultar_agenda' trabalhador.id %}"
+                       class="flex items-center justify-center gap-1.5 rounded-xl border border-mandik-200 bg-mandik-50 px-3 py-2.5 text-sm font-bold text-mandik-700 no-underline transition hover:bg-mandik-100">
+                        <i class="fas fa-calendar-alt text-xs"></i>
+                        Agenda
+                    </a>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if trabalhadores.has_other_pages %}
+    <nav class="flex items-center justify-center gap-1" aria-label="Paginação">
+        {% if trabalhadores.has_previous %}
+            <a href="?page={{ trabalhadores.previous_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}"
+               class="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 no-underline transition hover:border-mandik-200 hover:bg-mandik-50">
+                <i class="fas fa-chevron-left text-xs"></i> Anterior
+            </a>
+        {% endif %}
+
+        {% for num in trabalhadores.paginator.page_range %}
+            {% if trabalhadores.number == num %}
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-mandik-600 text-sm font-bold text-white">{{ num }}</span>
+            {% elif num > trabalhadores.number|add:'-3' and num < trabalhadores.number|add:'3' %}
+                <a href="?page={{ num }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}"
+                   class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 no-underline transition hover:border-mandik-200 hover:bg-mandik-50">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if trabalhadores.has_next %}
+            <a href="?page={{ trabalhadores.next_page_number }}&q={{ query }}&valor_min={{ valor_min }}&valor_max={{ valor_max }}"
+               class="flex h-9 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 no-underline transition hover:border-mandik-200 hover:bg-mandik-50">
+                Próxima <i class="fas fa-chevron-right text-xs"></i>
+            </a>
+        {% endif %}
+    </nav>
     {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="flex flex-col items-center rounded-3xl border border-slate-200 bg-white py-20 text-center shadow-sm">
+        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-mandik-50">
+            <i class="fas fa-search text-3xl text-mandik-300"></i>
+        </div>
+        <h3 class="mt-5 text-lg font-bold text-slate-700">Nenhum trabalhador encontrado</h3>
+        <p class="mt-2 max-w-xs text-sm text-slate-500">Tente ajustar os filtros de busca ou deixar os campos em branco para ver todos.</p>
+        <a href="{% url 'buscar_trabalhadores' %}"
+           class="mt-6 flex items-center gap-2 rounded-xl bg-mandik-600 px-5 py-2.5 text-sm font-bold text-white no-underline shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700">
+            <i class="fas fa-refresh text-xs"></i>
+            Ver todos os trabalhadores
+        </a>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

@@ -1,164 +1,255 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Painel do Contratante - Mandik{% endblock %}
+{% block title %}Painel do Contratante — Mandik{% endblock %}
 
 {% block head_extra %}
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Manrope', 'sans-serif'],
-                },
-                colors: {
-                    mandik: {
-                        50: '#f2fbf5',
-                        100: '#e0f7e7',
-                        500: '#2f8f57',
-                        600: '#27774a',
-                        700: '#1f5f3b',
-                        900: '#103222',
-                    }
-                }
-            }
-        }
-    }
-</script>
 <style>
     .dashboard-bg {
         background:
-            radial-gradient(circle at 12% 18%, rgba(47, 143, 87, 0.1), transparent 36%),
-            radial-gradient(circle at 86% 10%, rgba(16, 50, 34, 0.08), transparent 30%),
-            linear-gradient(180deg, #f8fcf9 0%, #eef5f0 100%);
+            radial-gradient(ellipse at 5% 0%, rgba(47,143,87,0.10) 0%, transparent 45%),
+            radial-gradient(ellipse at 95% 5%, rgba(16,50,34,0.07) 0%, transparent 40%),
+            #f4faf6;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="dashboard-bg -mx-3 sm:-mx-4 lg:-mx-6 px-4 py-8 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-7xl space-y-6">
-        <header class="flex flex-col gap-4 rounded-3xl border border-white/80 bg-white/85 p-6 shadow-lg backdrop-blur-sm md:flex-row md:items-center md:justify-between">
+<div class="dashboard-bg -mx-4 -mt-6 px-4 pb-12 pt-8 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+<div class="mx-auto max-w-6xl space-y-6">
+
+    <!-- ── Header ── -->
+    <header class="relative overflow-hidden rounded-3xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-sm">
+        <!-- Background field photo -->
+        <div class="absolute inset-0 opacity-[0.06]">
+            <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1200&q=60"
+                 alt="" class="w-full h-full object-cover" loading="lazy">
+        </div>
+        <!-- Left accent bar -->
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-mandik-500 rounded-l-3xl"></div>
+        <div class="relative flex flex-col gap-4 p-6 pl-7 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-4">
+            <div class="relative">
+                <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/25 text-2xl font-extrabold">
+                    {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                </div>
+                <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-mandik-500 border-2 border-white flex items-center justify-center">
+                    <i class="fas fa-briefcase text-[9px] text-white"></i>
+                </div>
+            </div>
             <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-mandik-700">Mandik</p>
-                <h1 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-                    <i class="fas fa-briefcase mr-2 text-mandik-600" aria-hidden="true"></i>Painel do Contratante
+                <p class="text-xs font-bold uppercase tracking-[0.18em] text-mandik-600">Mandik — Contratante</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
+                    Olá, {{ user.first_name|default:user.username }}!
                 </h1>
+                <p class="text-sm text-slate-500">Gerencie seus serviços e encontre novos trabalhadores.</p>
             </div>
-            <div class="flex flex-col gap-2 sm:flex-row">
-                <a href="{% url 'contratos:lista_contratos' %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-mandik-200 bg-mandik-50 px-4 py-2.5 text-sm font-semibold text-mandik-700 transition hover:bg-mandik-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
-                    <i class="fas fa-file-contract" aria-hidden="true"></i>Seus Contratos
-                </a>
-                <a href="{% url 'buscar_trabalhadores' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
-                    <i class="fas fa-search" aria-hidden="true"></i>Buscar Trabalhadores
-                </a>
-            </div>
-        </header>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{% url 'contratos:lista_contratos' %}"
+               class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 no-underline transition hover:border-mandik-200 hover:bg-mandik-50 hover:text-mandik-700">
+                <i class="fas fa-file-contract text-xs text-mandik-500"></i>
+                Contratos
+            </a>
+            <a href="{% url 'publicar_demanda' %}"
+               class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 no-underline transition hover:border-mandik-200 hover:bg-mandik-50 hover:text-mandik-700">
+                <i class="fas fa-bullhorn text-xs text-mandik-500"></i>
+                Publicar Demanda
+            </a>
+            <a href="{% url 'buscar_trabalhadores' %}"
+               class="flex items-center gap-2 rounded-xl bg-mandik-600 px-4 py-2 text-sm font-bold text-white no-underline shadow-md shadow-mandik-600/20 transition hover:bg-mandik-700">
+                <i class="fas fa-search text-xs"></i>
+                Buscar Trabalhadores
+            </a>
+        </div>
+        </div>
+    </header>
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo de indicadores">
-            <article class="rounded-2xl bg-sky-600 p-5 text-white shadow-sm">
-                <i class="fas fa-clipboard-list text-xl" aria-hidden="true"></i>
-                <p class="mt-3 text-3xl font-extrabold">{{ total_servicos }}</p>
-                <p class="text-sm text-sky-100">Total de Servicos</p>
-            </article>
-            <article class="rounded-2xl bg-amber-400 p-5 text-slate-900 shadow-sm">
-                <i class="fas fa-clock text-xl" aria-hidden="true"></i>
-                <p class="mt-3 text-3xl font-extrabold">{{ servicos_pendentes }}</p>
-                <p class="text-sm text-amber-900">Pendentes</p>
-            </article>
-            <article class="rounded-2xl bg-cyan-600 p-5 text-white shadow-sm">
-                <i class="fas fa-play text-xl" aria-hidden="true"></i>
-                <p class="mt-3 text-3xl font-extrabold">{{ servicos_aceitos }}</p>
-                <p class="text-sm text-cyan-100">Em Andamento</p>
-            </article>
-            <article class="rounded-2xl bg-mandik-600 p-5 text-white shadow-sm">
-                <i class="fas fa-check text-xl" aria-hidden="true"></i>
-                <p class="mt-3 text-3xl font-extrabold">{{ servicos_concluidos }}</p>
-                <p class="text-sm text-mandik-100">Concluidos</p>
-            </article>
-        </section>
 
-        <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" aria-label="Servicos recentes">
-            <div class="border-b border-slate-200 px-6 py-4">
-                <h2 class="text-lg font-bold text-slate-900">
-                    <i class="fas fa-list mr-2 text-mandik-600" aria-hidden="true"></i>Seus Servicos Recentes
-                </h2>
+    <!-- ── Stats Cards ── -->
+    <section class="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-label="Indicadores">
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-mandik-100 text-mandik-600">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Total</span>
             </div>
+            <p class="mt-3 text-3xl font-extrabold text-slate-900">{{ total_servicos }}</p>
+            <p class="mt-0.5 text-sm text-slate-500">Serviços</p>
+        </article>
 
-            <div class="p-2 sm:p-4">
-                {% if servicos %}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200">
-                            <thead class="bg-slate-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Trabalhador</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Descricao</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Data</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Valor</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">Acoes</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 bg-white">
-                                {% for servico in servicos %}
-                                <tr class="hover:bg-slate-50">
-                                    <td class="px-4 py-3 align-top">
-                                        <div class="flex items-start gap-3">
-                                            <i class="fas fa-user-circle text-2xl text-slate-400" aria-hidden="true"></i>
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-900">{{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}</p>
-                                                <p class="text-xs text-slate-500">{{ servico.trabalhador.telefone|default:"Sem telefone" }}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="max-w-xs px-4 py-3 text-sm text-slate-700">
-                                        <div class="line-clamp-3">
-                                            {{ servico.descricao|truncatechars:80 }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm text-slate-700">{{ servico.data_servico|date:"d/m/Y" }}</td>
-                                    <td class="px-4 py-3 text-sm font-semibold text-slate-800">R$ {{ servico.valor_acordado|floatformat:2 }}</td>
-                                    <td class="px-4 py-3">
-                                        {% if servico.status == 'pendente' %}
-                                            <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">Pendente</span>
-                                        {% elif servico.status == 'aceito' %}
-                                            <span class="inline-flex rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-semibold text-cyan-800">Aceito</span>
-                                        {% elif servico.status == 'concluido' %}
-                                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">Concluido</span>
-                                        {% else %}
-                                            <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">Cancelado</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="flex gap-2">
-                                            <a href="{% url 'detalhes_servico' servico.id %}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-700 transition hover:bg-sky-100" title="Ver detalhes" aria-label="Ver detalhes do servico">
-                                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                            </a>
-                                            <a href="{% url 'chat:criar_conversa' servico.trabalhador.id %}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-mandik-200 bg-mandik-50 text-mandik-700 transition hover:bg-mandik-100" title="Enviar mensagem" aria-label="Enviar mensagem ao trabalhador">
-                                                <i class="fas fa-comments" aria-hidden="true"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="px-4 py-10 text-center sm:px-6">
-                        <i class="fas fa-clipboard-list text-5xl text-slate-300" aria-hidden="true"></i>
-                        <h3 class="mt-4 text-lg font-bold text-slate-700">Nenhum servico contratado ainda</h3>
-                        <p class="mt-1 text-sm text-slate-500">Que tal buscar por trabalhadores disponiveis?</p>
-                        <a href="{% url 'buscar_trabalhadores' %}" class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700">
-                            <i class="fas fa-search" aria-hidden="true"></i>Buscar Trabalhadores
-                        </a>
-                    </div>
-                {% endif %}
+        <article class="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-200 text-amber-700">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <span class="text-xs font-semibold text-amber-500 uppercase tracking-wide">Aguardando</span>
             </div>
-        </section>
-    </div>
-</section>
+            <p class="mt-3 text-3xl font-extrabold text-amber-900">{{ servicos_pendentes }}</p>
+            <p class="mt-0.5 text-sm text-amber-700">Pendentes</p>
+        </article>
+
+        <article class="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-200 text-blue-700">
+                    <i class="fas fa-play"></i>
+                </div>
+                <span class="text-xs font-semibold text-blue-500 uppercase tracking-wide">Ativos</span>
+            </div>
+            <p class="mt-3 text-3xl font-extrabold text-blue-900">{{ servicos_aceitos }}</p>
+            <p class="mt-0.5 text-sm text-blue-700">Em Andamento</p>
+        </article>
+
+        <article class="rounded-2xl border border-mandik-200 bg-mandik-50 p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-mandik-200 text-mandik-700">
+                    <i class="fas fa-check"></i>
+                </div>
+                <span class="text-xs font-semibold text-mandik-500 uppercase tracking-wide">Feitos</span>
+            </div>
+            <p class="mt-3 text-3xl font-extrabold text-mandik-900">{{ servicos_concluidos }}</p>
+            <p class="mt-0.5 text-sm text-mandik-700">Concluídos</p>
+        </article>
+    </section>
+
+
+    <!-- ── Quick Actions ── -->
+    <section class="grid gap-4 sm:grid-cols-3">
+        <a href="{% url 'buscar_trabalhadores' %}"
+           class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-mandik-200 hover:shadow-md">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-600 text-lg">
+                <i class="fas fa-search"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-900">Buscar Trabalhadores</p>
+                <p class="text-xs text-slate-500">Encontre profissionais disponíveis</p>
+            </div>
+            <i class="fas fa-chevron-right ml-auto text-xs text-slate-400"></i>
+        </a>
+
+        <a href="{% url 'publicar_demanda' %}"
+           class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-mandik-200 hover:shadow-md">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-600 text-lg">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-900">Publicar Demanda</p>
+                <p class="text-xs text-slate-500">Crie uma vaga aberta</p>
+            </div>
+            <i class="fas fa-chevron-right ml-auto text-xs text-slate-400"></i>
+        </a>
+
+        <a href="{% url 'minhas_demandas' %}"
+           class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-mandik-200 hover:shadow-md">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-600 text-lg">
+                <i class="fas fa-list-alt"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-900">Minhas Demandas</p>
+                <p class="text-xs text-slate-500">Gerencie suas vagas abertas</p>
+            </div>
+            <i class="fas fa-chevron-right ml-auto text-xs text-slate-400"></i>
+        </a>
+    </section>
+
+
+    <!-- ── Serviços Recentes ── -->
+    <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+            <h2 class="flex items-center gap-2 text-base font-bold text-slate-900">
+                <i class="fas fa-list text-mandik-500 text-sm"></i>
+                Seus Serviços Recentes
+            </h2>
+            <a href="{% url 'buscar_trabalhadores' %}"
+               class="flex items-center gap-1.5 text-xs font-bold text-mandik-600 no-underline hover:text-mandik-700">
+                Novo serviço <i class="fas fa-plus text-[10px]"></i>
+            </a>
+        </div>
+
+        {% if servicos %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead>
+                    <tr class="border-b border-slate-100 bg-slate-50">
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Trabalhador</th>
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Descrição</th>
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Data</th>
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Valor</th>
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Status</th>
+                        <th class="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for servico in servicos %}
+                    <tr class="transition hover:bg-slate-50">
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mandik-100 text-mandik-700 text-sm font-bold">
+                                    {{ servico.trabalhador.get_full_name|default:servico.trabalhador.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ servico.trabalhador.get_full_name|default:servico.trabalhador.username }}</p>
+                                    <p class="text-xs text-slate-400">{{ servico.trabalhador.telefone|default:"—" }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="max-w-xs px-5 py-4 text-sm text-slate-600">{{ servico.descricao|truncatechars:70 }}</td>
+                        <td class="px-5 py-4 text-sm text-slate-600">{{ servico.data_servico|date:"d/m/Y" }}</td>
+                        <td class="px-5 py-4 text-sm font-bold text-mandik-700">R$ {{ servico.valor_acordado|floatformat:2 }}</td>
+                        <td class="px-5 py-4">
+                            {% if servico.status == 'pendente' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>Pendente
+                                </span>
+                            {% elif servico.status == 'aceito' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-800">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>Em Andamento
+                                </span>
+                            {% elif servico.status == 'concluido' %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-mandik-100 px-2.5 py-1 text-xs font-bold text-mandik-800">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-mandik-500"></span>Concluído
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>Cancelado
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-5 py-4">
+                            <div class="flex items-center gap-1.5">
+                                <a href="{% url 'detalhes_servico' servico.id %}"
+                                   class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 no-underline transition hover:border-mandik-200 hover:bg-mandik-50 hover:text-mandik-700"
+                                   title="Ver detalhes">
+                                    <i class="fas fa-eye text-xs"></i>
+                                </a>
+                                <a href="{% url 'chat:criar_conversa' servico.trabalhador.id %}"
+                                   class="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 no-underline transition hover:border-mandik-200 hover:bg-mandik-50 hover:text-mandik-700"
+                                   title="Enviar mensagem">
+                                    <i class="fas fa-comments text-xs"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="flex flex-col items-center px-6 py-16 text-center">
+            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-mandik-50">
+                <i class="fas fa-search text-3xl text-mandik-300"></i>
+            </div>
+            <h3 class="mt-5 text-lg font-bold text-slate-700">Nenhum serviço contratado ainda</h3>
+            <p class="mt-2 max-w-xs text-sm text-slate-500">Encontre trabalhadores disponíveis na região e inicie seu primeiro serviço.</p>
+            <a href="{% url 'buscar_trabalhadores' %}"
+               class="mt-6 flex items-center gap-2 rounded-xl bg-mandik-600 px-5 py-2.5 text-sm font-bold text-white no-underline shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700">
+                <i class="fas fa-search text-xs"></i>
+                Buscar Trabalhadores
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+</div>
 {% endblock %}

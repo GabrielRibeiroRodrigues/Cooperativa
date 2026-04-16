@@ -1,149 +1,473 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mandik{% endblock %}</title>
+
+    <!-- Tailwind CSS (preflight desativado para conviver com Bootstrap nas páginas ainda não migradas) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Manrope', 'sans-serif'],
+                    },
+                    colors: {
+                        mandik: {
+                            50:  '#f2fbf5',
+                            100: '#e0f7e7',
+                            200: '#bdefc9',
+                            500: '#2f8f57',
+                            600: '#27774a',
+                            700: '#1f5f3b',
+                            800: '#174d2e',
+                            900: '#103222',
+                        }
+                    },
+                    keyframes: {
+                        rise: {
+                            '0%':   { opacity: '0', transform: 'translateY(16px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            '0%':   { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        }
+                    },
+                    animation: {
+                        rise:    'rise 700ms ease-out forwards',
+                        fadeIn:  'fadeIn 300ms ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts: Manrope -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Bootstrap CSS — mantido para páginas ainda não migradas para Tailwind -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Alpine.js — interatividade leve para navbar e componentes Tailwind -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
     {% load static %}
     <link rel="stylesheet" href="{% static 'core/style.css' %}">
+
+    <style>
+        /* Garantir que o body use Manrope e tenha fundo consistente */
+        body {
+            font-family: 'Manrope', sans-serif !important;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main { flex: 1; }
+
+        /* Navbar link active indicator */
+        .nav-link-mandik {
+            position: relative;
+        }
+        .nav-link-mandik::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2px;
+            background: #27774a;
+            border-radius: 2px;
+            transition: transform 0.2s ease;
+        }
+        .nav-link-mandik:hover::after { transform: translateX(-50%) scaleX(1); }
+    </style>
+
     {% block head_extra %}{% endblock %}
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-seedling me-2"></i>Mandik
+
+<!-- ===================== NAVBAR ===================== -->
+<header
+    x-data="{
+        mobileOpen: false,
+        userOpen: false,
+        registerOpen: false,
+        closeAll() { this.userOpen = false; this.registerOpen = false; }
+    }"
+    @keydown.escape.window="mobileOpen = false; closeAll()"
+    class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-md"
+    style="font-family: 'Manrope', sans-serif;"
+>
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between gap-4">
+
+            <!-- ── Logo ── -->
+            <a href="{% url 'home' %}" class="flex shrink-0 items-center gap-2 no-underline">
+                <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-mandik-600 text-white shadow-md shadow-mandik-600/30">
+                    <i class="fas fa-seedling text-sm"></i>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight text-mandik-900">Mandik</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% if user.role == 'contratante' %}{% url 'painel_contratante' %}{% else %}{% url 'painel_trabalhador' %}{% endif %}">
-                                <i class="fas {% if user.role == 'contratante' %}fa-briefcase{% else %}fa-tools{% endif %} me-1"></i>Painel
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'contratos:lista_contratos' %}">
-                                <i class="fas fa-file-contract me-1"></i>Contratos
-                            </a>
-                        </li>
-                        {% if user.role == 'contratante' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'buscar_trabalhadores' %}">
-                                    <i class="fas fa-search me-1"></i>Buscar Trabalhadores
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'publicar_demanda' %}">
-                                    <i class="fas fa-bullhorn me-1"></i>Publicar Demanda
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'minhas_demandas' %}">
-                                    <i class="fas fa-list-alt me-1"></i>Minhas Demandas
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'disponibilidade:agenda_trabalhador' %}">
-                                    <i class="fas fa-calendar-alt me-1"></i>Minha Agenda
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'meus_servicos' %}">
-                                    <i class="fas fa-tractor me-1"></i>Meus Serviços
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'lista_demandas' %}">
-                                    <i class="fas fa-clipboard-check me-1"></i>Demandas Abertas
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'minhas_inscricoes' %}">
-                                    <i class="fas fa-paper-plane me-1"></i>Minhas Inscrições
-                                </a>
-                            </li>
-                        {% endif %}
-                        <li class="nav-item">
-                            <a class="nav-link position-relative" href="{% url 'chat:lista_conversas' %}">
-                                <i class="fas fa-comments me-1"></i>Mensagens
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="badge-mensagens" style="display: none;">
-                                    0
-                                </span>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
-                                <span class="badge bg-light text-success ms-1">{{ user.get_role_display }}</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'perfil' %}"><i class="fas fa-user-edit me-2"></i>Perfil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
-                            </ul>
-                        </li>
+
+            <!-- ── Desktop Navigation ── -->
+            <nav class="hidden flex-1 items-center justify-center gap-0.5 lg:flex" aria-label="Navegação principal">
+                {% if user.is_authenticated %}
+                    <a href="{% if user.role == 'contratante' %}{% url 'painel_contratante' %}{% else %}{% url 'painel_trabalhador' %}{% endif %}"
+                       class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas {% if user.role == 'contratante' %}fa-briefcase{% else %}fa-tools{% endif %} text-xs text-mandik-500"></i>
+                        Painel
+                    </a>
+                    <a href="{% url 'contratos:lista_contratos' %}"
+                       class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-file-contract text-xs text-mandik-500"></i>
+                        Contratos
+                    </a>
+                    {% if user.role == 'contratante' %}
+                        <a href="{% url 'buscar_trabalhadores' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-search text-xs text-mandik-500"></i>
+                            Buscar
+                        </a>
+                        <a href="{% url 'publicar_demanda' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-bullhorn text-xs text-mandik-500"></i>
+                            Publicar
+                        </a>
+                        <a href="{% url 'minhas_demandas' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-list-alt text-xs text-mandik-500"></i>
+                            Demandas
+                        </a>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Entrar
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarRegister" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-plus me-1"></i>Registrar
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarRegister">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'registro_contratante' %}">
-                                        <i class="fas fa-briefcase me-2 text-success"></i>Como Contratante
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'registro_trabalhador' %}">
-                                        <i class="fas fa-tractor me-2 text-success"></i>Como Trabalhador
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        <a href="{% url 'meus_servicos' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-tractor text-xs text-mandik-500"></i>
+                            Serviços
+                        </a>
+                        <a href="{% url 'lista_demandas' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-clipboard-check text-xs text-mandik-500"></i>
+                            Demandas
+                        </a>
+                        <a href="{% url 'minhas_inscricoes' %}"
+                           class="nav-link-mandik flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                            <i class="fas fa-paper-plane text-xs text-mandik-500"></i>
+                            Inscrições
+                        </a>
                     {% endif %}
-                </ul>
+                    <!-- Mensagens com badge -->
+                    <a href="{% url 'chat:lista_conversas' %}"
+                       class="nav-link-mandik relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 no-underline transition hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-comments text-xs text-mandik-500"></i>
+                        Mensagens
+                        <span id="badge-mensagens"
+                              class="hidden absolute -right-0.5 -top-0.5 min-w-[18px] rounded-full bg-red-500 px-1 py-0.5 text-center text-[10px] font-bold leading-none text-white">0</span>
+                    </a>
+                {% endif %}
+            </nav>
+
+            <!-- ── Desktop Right Side ── -->
+            <div class="hidden items-center gap-2 lg:flex">
+                {% if user.is_authenticated %}
+                    <!-- User dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button
+                            @click="open = !open"
+                            @click.outside="open = false"
+                            class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-mandik-300 hover:bg-mandik-50 focus:outline-none"
+                        >
+                            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-mandik-100 text-mandik-700 text-xs font-bold">
+                                {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                            </div>
+                            <span class="max-w-[120px] truncate">{{ user.get_full_name|default:user.username }}</span>
+                            <span class="rounded-full bg-mandik-100 px-2 py-0.5 text-xs font-semibold text-mandik-700">
+                                {{ user.get_role_display }}
+                            </span>
+                            <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200"
+                               :class="open ? 'rotate-180' : ''"></i>
+                        </button>
+                        <div
+                            x-show="open"
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 top-full mt-2 w-52 origin-top-right rounded-2xl border border-slate-100 bg-white py-1.5 shadow-xl"
+                            style="display: none;"
+                        >
+                            <div class="border-b border-slate-100 px-4 py-2.5">
+                                <p class="text-xs font-semibold text-slate-900 truncate">{{ user.get_full_name|default:user.username }}</p>
+                                <p class="text-xs text-slate-500">{{ user.email|default:"" }}</p>
+                            </div>
+                            <a href="{% url 'perfil' %}"
+                               class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                                <i class="fas fa-user-edit w-4 text-center text-mandik-500"></i>
+                                Meu Perfil
+                            </a>
+                            <div class="my-1 border-t border-slate-100"></div>
+                            <a href="{% url 'logout' %}"
+                               class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-600 no-underline hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt w-4 text-center"></i>
+                                Sair
+                            </a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <a href="{% url 'login' %}"
+                       class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 no-underline shadow-sm transition hover:border-mandik-300 hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-sign-in-alt mr-1.5 text-xs text-mandik-500"></i>
+                        Entrar
+                    </a>
+                    <!-- Register dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button
+                            @click="open = !open"
+                            @click.outside="open = false"
+                            class="inline-flex items-center gap-2 rounded-xl bg-mandik-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-mandik-600/20 transition hover:bg-mandik-700 focus:outline-none"
+                        >
+                            <i class="fas fa-user-plus text-xs"></i>
+                            Criar conta
+                            <i class="fas fa-chevron-down text-[10px] transition-transform duration-200"
+                               :class="open ? 'rotate-180' : ''"></i>
+                        </button>
+                        <div
+                            x-show="open"
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 top-full mt-2 w-56 origin-top-right rounded-2xl border border-slate-100 bg-white py-1.5 shadow-xl"
+                            style="display: none;"
+                        >
+                            <a href="{% url 'registro_contratante' %}"
+                               class="flex items-center gap-3 px-4 py-3 no-underline hover:bg-mandik-50">
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
+                                    <i class="fas fa-briefcase text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800">Contratante</p>
+                                    <p class="text-xs text-slate-500">Contratar trabalhadores</p>
+                                </div>
+                            </a>
+                            <div class="my-1 mx-3 border-t border-slate-100"></div>
+                            <a href="{% url 'registro_trabalhador' %}"
+                               class="flex items-center gap-3 px-4 py-3 no-underline hover:bg-mandik-50">
+                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
+                                    <i class="fas fa-tractor text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800">Trabalhador</p>
+                                    <p class="text-xs text-slate-500">Encontrar oportunidades</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- ── Mobile menu button ── -->
+            <button
+                @click="mobileOpen = !mobileOpen"
+                class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 lg:hidden focus:outline-none"
+                aria-label="Abrir menu de navegação"
+                :aria-expanded="mobileOpen"
+            >
+                <i class="fas text-sm transition-transform duration-200"
+                   :class="mobileOpen ? 'fa-times' : 'fa-bars'"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Mobile Menu ── -->
+    <div
+        x-show="mobileOpen"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-150"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2"
+        class="border-t border-slate-200 bg-white lg:hidden"
+        style="display: none;"
+    >
+        <div class="mx-auto max-w-7xl space-y-0.5 px-4 py-3 sm:px-6">
+            {% if user.is_authenticated %}
+                <!-- User info strip -->
+                <div class="mb-3 flex items-center gap-3 rounded-xl bg-mandik-50 px-4 py-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-mandik-200 text-mandik-800 text-sm font-bold">
+                        {{ user.get_full_name|default:user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-900">{{ user.get_full_name|default:user.username }}</p>
+                        <p class="text-xs text-mandik-700 font-medium">{{ user.get_role_display }}</p>
+                    </div>
+                </div>
+
+                <a href="{% if user.role == 'contratante' %}{% url 'painel_contratante' %}{% else %}{% url 'painel_trabalhador' %}{% endif %}"
+                   class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                    <i class="fas {% if user.role == 'contratante' %}fa-briefcase{% else %}fa-tools{% endif %} w-4 text-center text-mandik-500"></i>
+                    Painel
+                </a>
+                <a href="{% url 'contratos:lista_contratos' %}"
+                   class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                    <i class="fas fa-file-contract w-4 text-center text-mandik-500"></i>
+                    Contratos
+                </a>
+                {% if user.role == 'contratante' %}
+                    <a href="{% url 'buscar_trabalhadores' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-search w-4 text-center text-mandik-500"></i>Buscar Trabalhadores
+                    </a>
+                    <a href="{% url 'publicar_demanda' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-bullhorn w-4 text-center text-mandik-500"></i>Publicar Demanda
+                    </a>
+                    <a href="{% url 'minhas_demandas' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-list-alt w-4 text-center text-mandik-500"></i>Minhas Demandas
+                    </a>
+                {% else %}
+                    <a href="{% url 'meus_servicos' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-tractor w-4 text-center text-mandik-500"></i>Meus Serviços
+                    </a>
+                    <a href="{% url 'lista_demandas' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-clipboard-check w-4 text-center text-mandik-500"></i>Demandas Abertas
+                    </a>
+                    <a href="{% url 'minhas_inscricoes' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                        <i class="fas fa-paper-plane w-4 text-center text-mandik-500"></i>Minhas Inscrições
+                    </a>
+                {% endif %}
+                <a href="{% url 'chat:lista_conversas' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                    <i class="fas fa-comments w-4 text-center text-mandik-500"></i>
+                    Mensagens
+                    <span id="badge-mensagens-mobile" class="hidden ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">0</span>
+                </a>
+                <div class="my-2 border-t border-slate-100"></div>
+                <a href="{% url 'perfil' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                    <i class="fas fa-user-edit w-4 text-center text-mandik-500"></i>Meu Perfil
+                </a>
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-red-600 no-underline hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt w-4 text-center"></i>Sair
+                </a>
+
+            {% else %}
+                <a href="{% url 'login' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 no-underline hover:bg-mandik-50 hover:text-mandik-700">
+                    <i class="fas fa-sign-in-alt w-4 text-center text-mandik-500"></i>Entrar
+                </a>
+                <div class="my-2 border-t border-slate-100"></div>
+                <p class="px-4 py-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Criar conta</p>
+                <a href="{% url 'registro_contratante' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 no-underline hover:bg-mandik-50">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700 text-xs">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">Como Contratante</p>
+                        <p class="text-xs text-slate-500">Contratar trabalhadores</p>
+                    </div>
+                </a>
+                <a href="{% url 'registro_trabalhador' %}" class="flex items-center gap-3 rounded-xl px-4 py-2.5 no-underline hover:bg-mandik-50">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700 text-xs">
+                        <i class="fas fa-tractor"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">Como Trabalhador</p>
+                        <p class="text-xs text-slate-500">Encontrar oportunidades</p>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+<!-- ===================== FIM NAVBAR ===================== -->
+
+
+<!-- ===================== FLASH MESSAGES ===================== -->
+{% if messages %}
+<div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8" style="font-family: 'Manrope', sans-serif;">
+    {% for message in messages %}
+    <div
+        x-data="{ show: true }"
+        x-show="show"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-1"
+        class="mb-3 flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm
+            {% if message.tags == 'error' or message.tags == 'danger' %}border-red-200 bg-red-50 text-red-800
+            {% elif message.tags == 'success' %}border-mandik-200 bg-mandik-50 text-mandik-800
+            {% elif message.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-800
+            {% else %}border-blue-200 bg-blue-50 text-blue-800{% endif %}"
+        role="alert"
+    >
+        <div class="flex items-center gap-2 font-medium">
+            <i class="fas {% if message.tags == 'error' or message.tags == 'danger' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        <button @click="show = false" class="shrink-0 opacity-50 transition hover:opacity-100 focus:outline-none" aria-label="Fechar">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+<!-- ===================== FIM FLASH MESSAGES ===================== -->
+
+
+<!-- ===================== CONTEÚDO PRINCIPAL ===================== -->
+<main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    {% block content %}
+    {% endblock %}
+</main>
+<!-- ===================== FIM CONTEÚDO ===================== -->
+
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="mt-auto border-t border-slate-200 bg-white" style="font-family: 'Manrope', sans-serif;">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
+            <!-- Brand -->
+            <a href="{% url 'home' %}" class="flex items-center gap-2 no-underline">
+                <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-mandik-600 text-white shadow-md shadow-mandik-600/20">
+                    <i class="fas fa-seedling text-xs"></i>
+                </div>
+                <span class="text-base font-extrabold tracking-tight text-mandik-900">Mandik</span>
+            </a>
+
+            <!-- Copyright -->
+            <p class="text-xs text-slate-500 text-center">
+                &copy; 2026 Mandik — Conectando trabalhadores e contratantes do campo.
+            </p>
+
+            <!-- Links -->
+            <div class="flex items-center gap-5 text-xs font-semibold text-slate-500">
+                <a href="{% url 'lista_trabalhadores' %}" class="no-underline transition hover:text-mandik-600">Trabalhadores</a>
+                <a href="{% url 'lista_demandas' %}" class="no-underline transition hover:text-mandik-600">Demandas</a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="no-underline transition hover:text-mandik-600">Entrar</a>
+                {% endif %}
             </div>
         </div>
-    </nav>
+    </div>
+</footer>
+<!-- ===================== FIM FOOTER ===================== -->
 
-    <main class="container mt-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
 
-        {% block content %}
-        {% endblock %}
-    </main>
+<!-- Bootstrap JS — mantido para componentes Bootstrap nas páginas ainda não migradas -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <footer class="bg-light mt-5 py-4">
-        <div class="container text-center text-muted">
-            <p>&copy; 2026 Mandik - Conectando trabalhadores e contratantes do campo</p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}
-    {% endblock %}
+{% block scripts %}{% endblock %}
 </body>
 </html>

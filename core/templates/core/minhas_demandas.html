@@ -1,53 +1,139 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Minhas Demandas{% endblock %}
+{% block title %}Minhas Demandas — Mandik{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Minhas Demandas</h1>
-    <a class="btn btn-success" href="{% url 'publicar_demanda' %}">Nova demanda</a>
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">Minhas Demandas</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Gerencie as vagas que você publicou</p>
+  </div>
+  <a href="{% url 'publicar_demanda' %}"
+     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold shadow-sm hover:shadow transition-all">
+    <i class="fas fa-plus"></i>
+    Nova Demanda
+  </a>
 </div>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Status</label>
-                <select class="form-select" name="status">
-                    <option value="">Todos</option>
-                    <option value="aberta" {% if status_atual == 'aberta' %}selected{% endif %}>Aberta</option>
-                    <option value="em_andamento" {% if status_atual == 'em_andamento' %}selected{% endif %}>Em andamento</option>
-                    <option value="encerrada" {% if status_atual == 'encerrada' %}selected{% endif %}>Encerrada</option>
-                    <option value="cancelada" {% if status_atual == 'cancelada' %}selected{% endif %}>Cancelada</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button class="btn btn-outline-success" type="submit">Filtrar</button>
-            </div>
-        </form>
+<!-- Filter Bar -->
+<form method="get" class="bg-white rounded-2xl shadow-sm border border-slate-100 px-5 py-4 mb-6 flex flex-wrap items-end gap-4">
+  <div class="flex-1 min-w-[160px]">
+    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Status</label>
+    <select name="status"
+            class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-mandik-500 focus:ring-2 focus:ring-mandik-500/20 bg-white">
+      <option value="">Todos</option>
+      <option value="aberta" {% if status_atual == 'aberta' %}selected{% endif %}>Aberta</option>
+      <option value="em_andamento" {% if status_atual == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+      <option value="encerrada" {% if status_atual == 'encerrada' %}selected{% endif %}>Encerrada</option>
+      <option value="cancelada" {% if status_atual == 'cancelada' %}selected{% endif %}>Cancelada</option>
+    </select>
+  </div>
+  <button type="submit"
+          class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-semibold transition-colors">
+    <i class="fas fa-filter text-xs"></i>
+    Filtrar
+  </button>
+</form>
+
+<!-- Demand Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {% for demanda in demandas %}
+  <article class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all overflow-hidden flex flex-col group">
+    <!-- Card Photo Header -->
+    <div class="relative h-28 overflow-hidden
+        {% if demanda.status == 'aberta' %}bg-gradient-to-br from-mandik-600 to-mandik-800{% elif demanda.status == 'em_andamento' %}bg-gradient-to-br from-blue-600 to-blue-900{% else %}bg-gradient-to-br from-slate-500 to-slate-800{% endif %}">
+        {% if forloop.counter|divisibleby:5 %}
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition duration-700" loading="lazy">
+        {% elif forloop.counter|divisibleby:4 %}
+        <img src="https://images.unsplash.com/photo-1598301257982-0cf014dabbcd?auto=format&fit=crop&w=600&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition duration-700" loading="lazy">
+        {% elif forloop.counter|divisibleby:3 %}
+        <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=600&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition duration-700" loading="lazy">
+        {% elif forloop.counter|divisibleby:2 %}
+        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=600&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition duration-700" loading="lazy">
+        {% else %}
+        <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:scale-105 transition duration-700" loading="lazy">
+        {% endif %}
+        <!-- Type tag top-left -->
+        <div class="absolute top-3 left-3">
+            <span class="inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-sm px-2 py-1 text-xs font-semibold text-white">
+                <i class="fas fa-tag text-[10px]"></i>
+                {{ demanda.tipo_servico.nome }}
+            </span>
+        </div>
+        <!-- Status badge top-right -->
+        <div class="absolute top-3 right-3">
+            {% if demanda.status == 'aberta' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-mandik-400/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>Aberta
+            </span>
+            {% elif demanda.status == 'em_andamento' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-blue-400/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>Em andamento
+            </span>
+            {% elif demanda.status == 'encerrada' %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-white/80"></span>Encerrada
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1 rounded-full bg-red-400/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                <span class="w-1.5 h-1.5 rounded-full bg-white"></span>{{ demanda.get_status_display }}
+            </span>
+            {% endif %}
+        </div>
+        <!-- Title bottom -->
+        <div class="absolute inset-x-0 bottom-0 p-4">
+            <h2 class="text-base font-bold leading-tight text-white drop-shadow">{{ demanda.titulo }}</h2>
+        </div>
     </div>
-</div>
 
-<div class="row g-3">
-    {% for demanda in demandas %}
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h5">{{ demanda.titulo }}</h2>
-                    <p class="mb-1"><strong>Tipo:</strong> {{ demanda.tipo_servico.nome }}</p>
-                    <p class="mb-1"><strong>Status:</strong> {{ demanda.get_status_display }}</p>
-                    <p class="mb-1"><strong>Inscrições:</strong> {{ demanda.inscricoes.count }}</p>
-                    <p class="mb-0"><strong>Vagas disponíveis:</strong> {{ demanda.vagas_disponiveis }}</p>
-                </div>
-                <div class="card-footer bg-white border-0 pt-0">
-                    <a href="{% url 'detalhe_demanda' demanda.id %}" class="btn btn-outline-primary w-100">Acompanhar inscrições</a>
-                </div>
-            </div>
+    <!-- Card Body -->
+    <div class="px-5 py-4 flex-1">
+      <!-- Stats Row -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Inscrições</p>
+          <p class="mt-0.5 text-sm font-bold text-slate-800">{{ demanda.inscricoes.count }} recebida{% if demanda.inscricoes.count != 1 %}s{% endif %}</p>
         </div>
-    {% empty %}
-        <div class="col-12">
-            <div class="alert alert-warning mb-0">Você ainda não publicou demandas.</div>
+        <div class="rounded-xl bg-mandik-50 px-3 py-2.5">
+          <p class="text-[10px] font-bold uppercase tracking-wide text-mandik-500">Vagas</p>
+          <p class="mt-0.5 text-sm font-bold text-mandik-800">{{ demanda.vagas_disponiveis }}/{{ demanda.vagas }} disponíveis</p>
         </div>
-    {% endfor %}
+        <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data</p>
+          <p class="mt-0.5 text-sm font-bold text-slate-800">{{ demanda.data_servico|date:'d/m/Y' }}</p>
+        </div>
+        <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+          <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Valor</p>
+          <p class="mt-0.5 text-sm font-bold text-slate-800">R$ {{ demanda.valor_oferecido|floatformat:2 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Footer -->
+    <div class="px-5 py-3.5 border-t border-slate-100">
+      <a href="{% url 'detalhe_demanda' demanda.id %}"
+         class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold transition-colors">
+        <i class="fas fa-users text-xs"></i>
+        Acompanhar Inscrições
+      </a>
+    </div>
+  </article>
+  {% empty %}
+  <div class="col-span-2">
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-16 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-mandik-50 flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-bullhorn text-2xl text-mandik-400"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-700 mb-1">Nenhuma demanda publicada</h3>
+      <p class="text-slate-400 text-sm mb-6">Publique uma demanda para encontrar trabalhadores para o seu serviço.</p>
+      <a href="{% url 'publicar_demanda' %}"
+         class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold shadow-sm transition-all">
+        <i class="fas fa-plus"></i>
+        Publicar Demanda
+      </a>
+    </div>
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}

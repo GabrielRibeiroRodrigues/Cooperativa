@@ -1,146 +1,207 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{{ trabalhador.get_full_name|default:trabalhador.username }} - Cooperativa Rural{% endblock %}
+{% block title %}{{ trabalhador.get_full_name|default:trabalhador.username }} — Mandik{% endblock %}
+
+{% block head_extra %}
+<style>
+    /* Override Bootstrap form-control to match Mandik design */
+    .mandik-form .form-control,
+    .mandik-form .form-select {
+        border-radius: 0.75rem;
+        border-color: #cbd5e1;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.875rem;
+        font-family: 'Manrope', sans-serif;
+        transition: border-color 120ms, box-shadow 120ms;
+    }
+    .mandik-form .form-control:focus,
+    .mandik-form .form-select:focus {
+        border-color: #27774a;
+        box-shadow: 0 0 0 3px rgba(47,143,87,0.15);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card perfil-card">
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    <i class="fas fa-user-circle fa-5x text-success"></i>
+<div class="space-y-6">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-xs text-slate-500" aria-label="Breadcrumb">
+        <a href="{% url 'buscar_trabalhadores' %}" class="font-semibold text-mandik-600 no-underline hover:text-mandik-700">Buscar Trabalhadores</a>
+        <i class="fas fa-chevron-right text-[9px]"></i>
+        <span>{{ trabalhador.get_full_name|default:trabalhador.username }}</span>
+    </nav>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+
+        <!-- ── Left: Worker Profile Card ── -->
+        <aside class="space-y-4 lg:col-span-1">
+            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <!-- Profile header with gradient -->
+                <div class="relative h-28 bg-gradient-to-br from-mandik-700 to-mandik-900">
+                    <div class="absolute inset-0 opacity-10" style="background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=400&q=30'); background-size: cover;"></div>
+                    <div class="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl border-4 border-white bg-mandik-100 text-mandik-700 text-2xl font-extrabold shadow-lg">
+                            {{ trabalhador.get_full_name|default:trabalhador.username|slice:":1"|upper }}
+                        </div>
+                    </div>
                 </div>
-                <h4 class="text-center">{{ trabalhador.get_full_name|default:trabalhador.username }}</h4>
-                <div class="perfil-rating">
-                    {% if trabalhador.avaliacao_media > 0 %}
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= trabalhador.avaliacao_media %}
-                                <i class="fas fa-star text-warning"></i>
-                            {% else %}
-                                <i class="far fa-star text-muted"></i>
-                            {% endif %}
-                        {% endfor %}
-                        <span class="ms-2">({{ trabalhador.avaliacao_media|floatformat:1 }})</span>
-                    {% else %}
-                        <span class="text-muted">Sem avaliações ainda</span>
-                    {% endif %}
-                </div>
-                
-                <div class="text-center mt-4">
-                    <div class="mb-3">
-                        <h5 class="text-success">R$ {{ trabalhador.valor_diario|floatformat:2 }}/dia</h5>
+
+                <div class="px-6 pb-6 pt-12 text-center">
+                    <h1 class="text-xl font-extrabold text-slate-900">{{ trabalhador.get_full_name|default:trabalhador.username }}</h1>
+                    <p class="mt-0.5 text-sm text-slate-500">Trabalhador Rural</p>
+
+                    <!-- Rating -->
+                    <div class="mt-3 flex items-center justify-center gap-2">
+                        {% if trabalhador.avaliacao_media > 0 %}
+                            <div class="flex gap-0.5">
+                                {% for i in "12345" %}
+                                    <i class="fas fa-star text-amber-400 text-sm"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="text-sm font-bold text-slate-700">{{ trabalhador.avaliacao_media|floatformat:1 }}</span>
+                        {% else %}
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Sem avaliações ainda</span>
+                        {% endif %}
                     </div>
-                    {% if trabalhador.telefone %}
-                    <div class="mb-3">
-                        <i class="fas fa-phone text-info me-2"></i>
-                        {{ trabalhador.telefone }}
+
+                    <!-- Price -->
+                    <div class="mt-5 rounded-2xl bg-mandik-50 px-4 py-3">
+                        <p class="text-xs font-bold uppercase tracking-wide text-mandik-600">Valor diário</p>
+                        <p class="mt-1 text-3xl font-extrabold text-mandik-700">R$ {{ trabalhador.valor_diario|floatformat:2 }}</p>
                     </div>
-                    {% endif %}
-                    <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="fas fa-clipboard-list me-1"></i>
-                            {{ trabalhador.servicos_trabalhados.count }} trabalhos realizados
-                        </small>
+
+                    <!-- Info pills -->
+                    <div class="mt-4 space-y-2">
+                        {% if trabalhador.telefone %}
+                        <div class="flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                            <i class="fas fa-phone text-xs text-mandik-500"></i>
+                            <span class="font-semibold">{{ trabalhador.telefone }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center justify-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                            <i class="fas fa-clipboard-check text-xs text-mandik-500"></i>
+                            <span class="font-semibold">{{ trabalhador.servicos_trabalhados.count }} serviços realizados</span>
+                        </div>
                     </div>
-                    <div class="d-grid gap-2 mt-4">
-                        <a href="{% url 'disponibilidade:consultar_agenda' trabalhador.id %}" class="btn btn-outline-success">
-                            <i class="far fa-calendar-alt me-2"></i>Ver Agenda de Disponibilidade
-                        </a>
-                    </div>
+
+                    <a href="{% url 'disponibilidade:consultar_agenda' trabalhador.id %}"
+                       class="mt-4 flex items-center justify-center gap-2 rounded-xl border border-mandik-200 bg-mandik-50 px-4 py-2.5 text-sm font-bold text-mandik-700 no-underline transition hover:bg-mandik-100">
+                        <i class="far fa-calendar-alt text-xs"></i>
+                        Ver Agenda de Disponibilidade
+                    </a>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-handshake me-2"></i>Solicitar Serviço
-                </h5>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.errors }}
-                        </div>
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.descricao.id_for_label }}" class="form-label">{{ form.descricao.label }}</label>
-                        {{ form.descricao }}
-                        <div class="form-text">Descreva detalhadamente o trabalho que precisa ser realizado</div>
+        </aside>
+
+        <!-- ── Right: Request Form + Reviews ── -->
+        <div class="space-y-6 lg:col-span-2">
+
+            <!-- Service Request Form -->
+            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div class="flex items-center gap-3 border-b border-slate-100 bg-mandik-600 px-6 py-4">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20">
+                        <i class="fas fa-handshake text-white text-sm"></i>
                     </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="{{ form.data_servico.id_for_label }}" class="form-label">{{ form.data_servico.label }}</label>
-                            {{ form.data_servico }}
+                    <h2 class="text-base font-bold text-white">Solicitar Serviço</h2>
+                </div>
+
+                <div class="p-6">
+                    <form method="post" class="mandik-form space-y-5">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <i class="fas fa-exclamation-circle mt-0.5 shrink-0"></i>
+                            <div>{{ form.errors }}</div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="{{ form.data_fim.id_for_label }}" class="form-label">{{ form.data_fim.label }}</label>
-                            {{ form.data_fim }}
-                            <small class="text-muted">Deixe em branco se for apenas um dia</small>
+                        {% endif %}
+
+                        <div>
+                            <label for="{{ form.descricao.id_for_label }}" class="mb-1.5 block text-sm font-bold text-slate-700">
+                                {{ form.descricao.label }}
+                            </label>
+                            {{ form.descricao }}
+                            <p class="mt-1 text-xs text-slate-500">Descreva detalhadamente o trabalho que precisa ser realizado</p>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Valor Acordado</label>
-                            <div class="form-control-plaintext">
-                                <strong class="text-success">R$ {{ trabalhador.valor_diario|floatformat:2 }}</strong>
-                                <small class="text-muted d-block">Valor diário do trabalhador</small>
+
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label for="{{ form.data_servico.id_for_label }}" class="mb-1.5 block text-sm font-bold text-slate-700">
+                                    {{ form.data_servico.label }}
+                                </label>
+                                {{ form.data_servico }}
+                            </div>
+                            <div>
+                                <label for="{{ form.data_fim.id_for_label }}" class="mb-1.5 block text-sm font-bold text-slate-700">
+                                    {{ form.data_fim.label }}
+                                </label>
+                                {{ form.data_fim }}
+                                <p class="mt-1 text-xs text-slate-500">Deixe em branco se for apenas um dia</p>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-paper-plane me-2"></i>Enviar Solicitação
+
+                        <!-- Valor acordado (read-only info) -->
+                        <div class="rounded-2xl border border-mandik-100 bg-mandik-50 px-4 py-4">
+                            <p class="text-xs font-bold uppercase tracking-wide text-mandik-600">Valor acordado</p>
+                            <p class="mt-1 text-2xl font-extrabold text-mandik-800">R$ {{ trabalhador.valor_diario|floatformat:2 }}
+                                <span class="text-sm font-semibold text-mandik-600">/dia</span>
+                            </p>
+                            <p class="mt-0.5 text-xs text-mandik-600">Valor diário estabelecido pelo trabalhador</p>
+                        </div>
+
+                        <button type="submit"
+                                class="flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus:outline-none">
+                            <i class="fas fa-paper-plane text-xs"></i>
+                            Enviar Solicitação
                         </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            {% if avaliacoes %}
+            <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div class="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-500">
+                        <i class="fas fa-star text-sm"></i>
                     </div>
-                </form>
-            </div>
-        </div>
-        
-        {% if avaliacoes %}
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-star me-2"></i>Avaliações Recentes
-                </h5>
-            </div>
-            <div class="card-body">
-                {% for avaliacao in avaliacoes %}
-                    <div class="mb-3 p-3 bg-light rounded">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="rating mb-2">
+                    <h2 class="text-base font-bold text-slate-900">Avaliações Recentes</h2>
+                    <span class="ml-auto rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{{ avaliacoes|length }}</span>
+                </div>
+                <div class="divide-y divide-slate-50 p-4">
+                    {% for avaliacao in avaliacoes %}
+                    <div class="py-4 first:pt-2">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mandik-100 text-mandik-700 text-xs font-bold">
+                                {{ avaliacao.avaliador.get_full_name|default:avaliacao.avaliador.username|slice:":1"|upper }}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="text-sm font-bold text-slate-900">{{ avaliacao.avaliador.get_full_name|default:avaliacao.avaliador.username }}</p>
+                                    <p class="text-xs text-slate-400">{{ avaliacao.data_avaliacao|date:"d/m/Y" }}</p>
+                                </div>
+                                <div class="mt-1 flex gap-0.5">
                                     {% for i in "12345" %}
                                         {% if forloop.counter <= avaliacao.nota %}
-                                            <i class="fas fa-star text-warning"></i>
+                                            <i class="fas fa-star text-amber-400 text-xs"></i>
                                         {% else %}
-                                            <i class="far fa-star text-muted"></i>
+                                            <i class="far fa-star text-slate-300 text-xs"></i>
                                         {% endif %}
                                     {% endfor %}
                                 </div>
                                 {% if avaliacao.comentario %}
-                                    <p class="mb-1">{{ avaliacao.comentario }}</p>
+                                <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ avaliacao.comentario }}</p>
                                 {% endif %}
-                                <small class="text-muted">
-                                    Por {{ avaliacao.avaliador.get_full_name|default:avaliacao.avaliador.username }}
-                                    em {{ avaliacao.data_avaliacao|date:"d/m/Y" }}
-                                </small>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
+            {% endif %}
+
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

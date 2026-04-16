@@ -1,80 +1,169 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Lista de Demandas{% endblock %}
+{% block title %}Demandas Abertas — Mandik{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h3 mb-0">Demandas Abertas</h1>
-        <small class="text-muted">Demandas compatíveis com seu perfil.</small>
-    </div>
-</div>
+<div class="space-y-6">
 
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Busca</label>
-                <input type="text" class="form-control" name="q" value="{{ filtros.q }}" placeholder="Título, descrição...">
+    <!-- ── Page header ── -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.18em] text-mandik-600">Oportunidades</p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Demandas Abertas</h1>
+            <p class="mt-1 text-sm text-slate-500">Demandas compatíveis com seu perfil de serviços</p>
+        </div>
+    </div>
+
+    <!-- ── Filters ── -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <form method="get" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Busca</label>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-search text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="text" name="q" value="{{ filtros.q }}" placeholder="Título, descrição..."
+                           class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-8 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Tipo de serviço</label>
-                <select class="form-select" name="tipo_servico">
-                    <option value="">Todos</option>
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Tipo de serviço</label>
+                <select name="tipo_servico"
+                        class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
+                    <option value="">Todos os tipos</option>
                     {% for tipo_id, tipo_nome in tipos_servico %}
                         <option value="{{ tipo_id }}" {% if filtros.tipo_servico == tipo_id|stringformat:'s' %}selected{% endif %}>{{ tipo_nome }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Localização</label>
-                <input type="text" class="form-control" name="localizacao" value="{{ filtros.localizacao }}">
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Localização</label>
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fas fa-map-marker-alt text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="text" name="localizacao" value="{{ filtros.localizacao }}" placeholder="Cidade, estado..."
+                           class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-8 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Compatibilidade</label>
-                <select class="form-select" name="somente_compativeis">
+            <div>
+                <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">Compatibilidade</label>
+                <select name="somente_compativeis"
+                        class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-mandik-500 focus:ring-2 focus:ring-mandik-100">
                     <option value="1" {% if filtros.somente_compativeis == '1' %}selected{% endif %}>Somente compatíveis</option>
                     <option value="0" {% if filtros.somente_compativeis == '0' %}selected{% endif %}>Mostrar todas</option>
                 </select>
             </div>
-            <div class="col-md-1 d-flex align-items-end">
-                <button class="btn btn-success w-100" type="submit"><i class="fas fa-search"></i></button>
+            <div class="flex items-end">
+                <button type="submit"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-mandik-600/20 transition hover:bg-mandik-700 focus:outline-none">
+                    <i class="fas fa-search text-xs"></i>
+                    Filtrar
+                </button>
             </div>
         </form>
     </div>
-</div>
 
-<div class="row g-3">
-    {% for demanda in demandas %}
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h2 class="h5 mb-0">{{ demanda.titulo }}</h2>
-                        {% if demanda.tipo_servico.id in tipo_ids_trabalhador %}
-                            <span class="badge bg-success">Compatível</span>
-                        {% else %}
-                            <span class="badge bg-warning text-dark">Não compatível</span>
-                        {% endif %}
-                    </div>
-                    <p class="mb-1"><strong>Tipo:</strong> {{ demanda.tipo_servico.nome }}</p>
-                    <p class="mb-1"><strong>Data:</strong> {{ demanda.data_servico|date:'d/m/Y' }}</p>
-                    <p class="mb-1"><strong>Valor:</strong> R$ {{ demanda.valor_oferecido|floatformat:2 }}</p>
-                    <p class="mb-1"><strong>Local:</strong> {{ demanda.localizacao|default:'Não informado' }}</p>
-                    <p class="mb-0"><strong>Vagas disponíveis:</strong> {{ demanda.vagas_disponiveis }}</p>
-                </div>
-                <div class="card-footer bg-white border-0 pt-0">
-                    <a href="{% url 'detalhe_demanda' demanda.id %}" class="btn btn-outline-success w-100">Ver detalhes</a>
-                    {% if demanda.id in inscricoes_ids %}
-                        <small class="text-muted d-block mt-2">Você já se inscreveu nesta demanda.</small>
+    <!-- ── Results ── -->
+    {% if demandas %}
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {% for demanda in demandas %}
+        <article class="flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md
+            {% if demanda.tipo_servico.id in tipo_ids_trabalhador %}border-mandik-200 hover:border-mandik-300{% else %}border-slate-200 hover:border-slate-300{% endif %}">
+
+            <!-- Card Image Header -->
+            <div class="relative h-28 overflow-hidden
+                {% if demanda.tipo_servico.id in tipo_ids_trabalhador %}bg-gradient-to-br from-mandik-600 to-mandik-800{% else %}bg-gradient-to-br from-slate-600 to-slate-800{% endif %}">
+                {% if forloop.counter|divisibleby:5 %}
+                <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
+                {% elif forloop.counter|divisibleby:4 %}
+                <img src="https://images.unsplash.com/photo-1598301257982-0cf014dabbcd?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
+                {% elif forloop.counter|divisibleby:3 %}
+                <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
+                {% elif forloop.counter|divisibleby:2 %}
+                <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=500&q=50" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
+                {% endif %}
+                <!-- Overlay info -->
+                <div class="absolute inset-x-0 bottom-0 p-4 flex items-end justify-between">
+                    <h2 class="text-base font-bold leading-tight text-white drop-shadow">{{ demanda.titulo }}</h2>
+                    {% if demanda.tipo_servico.id in tipo_ids_trabalhador %}
+                        <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-mandik-400/80 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                            <i class="fas fa-check text-[9px]"></i>Compatível
+                        </span>
+                    {% else %}
+                        <span class="shrink-0 inline-flex items-center gap-1 rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-[11px] font-bold text-white">
+                            <i class="fas fa-times text-[9px]"></i>Incompatível
+                        </span>
                     {% endif %}
                 </div>
+                <!-- Type tag -->
+                <div class="absolute top-3 left-3">
+                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-black/30 backdrop-blur-sm px-2 py-1 text-xs font-semibold text-white">
+                        <i class="fas fa-tag text-[10px]"></i>
+                        {{ demanda.tipo_servico.nome }}
+                    </span>
+                </div>
             </div>
+
+            <!-- Card Body -->
+            <div class="flex-1 p-5">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Data</p>
+                        <p class="mt-0.5 text-sm font-bold text-slate-800">{{ demanda.data_servico|date:'d/m/Y' }}</p>
+                    </div>
+                    <div class="rounded-xl bg-mandik-50 px-3 py-2.5">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-mandik-500">Valor</p>
+                        <p class="mt-0.5 text-sm font-bold text-mandik-800">R$ {{ demanda.valor_oferecido|floatformat:2 }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Local</p>
+                        <p class="mt-0.5 text-sm font-semibold text-slate-700 truncate">{{ demanda.localizacao|default:'Não informado' }}</p>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 px-3 py-2.5">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Vagas</p>
+                        <p class="mt-0.5 text-sm font-bold text-slate-800">{{ demanda.vagas_disponiveis }} disponíve{% if demanda.vagas_disponiveis != 1 %}is{% else %}l{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="border-t border-slate-100 p-4">
+                {% if demanda.id in inscricoes_ids %}
+                    <div class="flex items-center gap-2 rounded-xl bg-mandik-50 px-3 py-2.5 text-sm font-semibold text-mandik-700">
+                        <i class="fas fa-check-circle text-mandik-500 text-xs"></i>
+                        Inscrição enviada
+                    </div>
+                {% else %}
+                    <a href="{% url 'detalhe_demanda' demanda.id %}"
+                       class="flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-4 py-2.5 text-sm font-bold text-white no-underline transition hover:bg-mandik-700">
+                        <i class="fas fa-eye text-xs"></i>
+                        Ver detalhes e se inscrever
+                    </a>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="flex flex-col items-center rounded-3xl border border-slate-200 bg-white py-20 text-center shadow-sm">
+        <div class="flex h-20 w-20 items-center justify-center rounded-full bg-mandik-50">
+            <i class="fas fa-clipboard-list text-3xl text-mandik-300"></i>
         </div>
-    {% empty %}
-        <div class="col-12">
-            <div class="alert alert-warning mb-0">Nenhuma demanda aberta encontrada.</div>
-        </div>
-    {% endfor %}
+        <h3 class="mt-5 text-lg font-bold text-slate-700">Nenhuma demanda encontrada</h3>
+        <p class="mt-2 max-w-xs text-sm text-slate-500">Tente remover alguns filtros ou volte mais tarde para ver novas oportunidades.</p>
+        <a href="{% url 'lista_demandas' %}"
+           class="mt-6 flex items-center gap-2 rounded-xl bg-mandik-600 px-5 py-2.5 text-sm font-bold text-white no-underline shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700">
+            <i class="fas fa-refresh text-xs"></i>
+            Ver todas as demandas
+        </a>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

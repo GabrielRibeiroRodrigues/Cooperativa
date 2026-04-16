@@ -1,48 +1,133 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Tipos de Serviço{% endblock %}
+{% block title %}Tipos de Serviço — Mandik{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Tipos de Serviço</h1>
-    {% if user.role == 'contratante' %}
-        <a href="{% url 'criar_tipo_servico' %}" class="btn btn-success">Novo tipo</a>
-    {% endif %}
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">Tipos de Serviço</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Categorias de serviços disponíveis na plataforma</p>
+  </div>
+  {% if user.role == 'contratante' %}
+  <a href="{% url 'criar_tipo_servico' %}"
+     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold shadow-sm transition-all">
+    <i class="fas fa-plus"></i>
+    Novo Tipo
+  </a>
+  {% endif %}
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-striped mb-0">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Risco</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tipo in tipos %}
-                    <tr>
-                        <td>{{ tipo.nome }}</td>
-                        <td>{% if tipo.e_servico_risco %}<span class="badge bg-danger">Sim{% else %}<span class="badge bg-secondary">Não{% endif %}</span></td>
-                        <td>{% if tipo.ativo %}<span class="badge bg-success">Ativo{% else %}<span class="badge bg-warning text-dark">Inativo{% endif %}</span></td>
-                        <td>
-                            {% if user.role == 'contratante' %}
-                                <a href="{% url 'editar_tipo_servico' tipo.id %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                                <a href="{% url 'excluir_tipo_servico' tipo.id %}" class="btn btn-sm btn-outline-danger">Excluir</a>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4">Nenhum tipo de serviço cadastrado.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+  <div class="bg-mandik-600 px-6 py-4">
+    <h2 class="text-base font-bold text-white flex items-center gap-2">
+      <i class="fas fa-tags"></i>
+      Tipos Cadastrados
+    </h2>
+  </div>
+
+  <!-- Desktop Table -->
+  <div class="hidden sm:block overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="bg-slate-50 border-b border-slate-100">
+          <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Nome</th>
+          <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Risco</th>
+          <th class="text-left px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+          {% if user.role == 'contratante' %}
+          <th class="text-right px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Ações</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        {% for tipo in tipos %}
+        <tr class="hover:bg-slate-50/70 transition-colors">
+          <td class="px-6 py-4 font-semibold text-slate-800">{{ tipo.nome }}</td>
+          <td class="px-6 py-4">
+            {% if tipo.e_servico_risco %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+              <i class="fas fa-exclamation-triangle text-[10px]"></i>Sim
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">
+              Não
+            </span>
+            {% endif %}
+          </td>
+          <td class="px-6 py-4">
+            {% if tipo.ativo %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-mandik-100 text-mandik-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-mandik-500"></span>Ativo
+            </span>
+            {% else %}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Inativo
+            </span>
+            {% endif %}
+          </td>
+          {% if user.role == 'contratante' %}
+          <td class="px-6 py-4 text-right">
+            <div class="flex items-center justify-end gap-2">
+              <a href="{% url 'editar_tipo_servico' tipo.id %}"
+                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors">
+                <i class="fas fa-pen text-[10px]"></i>Editar
+              </a>
+              <a href="{% url 'excluir_tipo_servico' tipo.id %}"
+                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold transition-colors">
+                <i class="fas fa-trash text-[10px]"></i>Excluir
+              </a>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+            <i class="fas fa-tags text-3xl mb-2 block"></i>
+            Nenhum tipo de serviço cadastrado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Cards -->
+  <div class="sm:hidden divide-y divide-slate-100">
+    {% for tipo in tipos %}
+    <div class="px-5 py-4">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <p class="font-semibold text-slate-800 text-sm">{{ tipo.nome }}</p>
+        {% if tipo.ativo %}
+        <span class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-semibold bg-mandik-100 text-mandik-700 px-2 py-0.5 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-mandik-500"></span>Ativo
+        </span>
+        {% else %}
+        <span class="flex-shrink-0 inline-flex items-center gap-1 text-xs font-semibold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Inativo</span>
+        {% endif %}
+      </div>
+      {% if tipo.e_servico_risco %}
+      <p class="text-xs text-red-600 mb-2 flex items-center gap-1"><i class="fas fa-exclamation-triangle text-[10px]"></i>Serviço de risco</p>
+      {% endif %}
+      {% if user.role == 'contratante' %}
+      <div class="flex gap-2 mt-3">
+        <a href="{% url 'editar_tipo_servico' tipo.id %}"
+           class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold transition-colors">
+          <i class="fas fa-pen text-[10px]"></i>Editar
+        </a>
+        <a href="{% url 'excluir_tipo_servico' tipo.id %}"
+           class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-red-200 bg-red-50 text-red-600 text-xs font-semibold transition-colors">
+          <i class="fas fa-trash text-[10px]"></i>Excluir
+        </a>
+      </div>
+      {% endif %}
     </div>
+    {% empty %}
+    <div class="px-5 py-12 text-center text-slate-400">
+      <i class="fas fa-tags text-2xl mb-2 block"></i>
+      <p class="text-sm">Nenhum tipo de serviço cadastrado.</p>
+    </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

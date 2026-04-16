@@ -1,17 +1,33 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Excluir Tipo de Serviço{% endblock %}
+{% block title %}Excluir Tipo de Serviço — Mandik{% endblock %}
 
 {% block content %}
-<div class="card col-lg-6 mx-auto">
-    <div class="card-body">
-        <h1 class="h5">Excluir tipo de serviço</h1>
-        <p>Confirma a exclusão de <strong>{{ tipo.nome }}</strong>?</p>
-        <form method="post">
-            {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Excluir</button>
-            <a class="btn btn-outline-secondary ms-2" href="{% url 'lista_tipos_servico' %}">Cancelar</a>
-        </form>
+<div class="max-w-md mx-auto">
+  <div class="bg-white rounded-2xl shadow-sm border border-red-100 overflow-hidden">
+    <div class="bg-red-600 px-6 py-5">
+      <h1 class="text-base font-bold text-white flex items-center gap-2">
+        <i class="fas fa-trash-alt"></i>
+        Excluir Tipo de Serviço
+      </h1>
     </div>
+    <div class="px-6 py-6">
+      <div class="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-100 mb-6">
+        <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+        <p class="text-sm text-red-800">Confirma a exclusão de <strong>{{ tipo.nome }}</strong>? Esta ação não pode ser desfeita.</p>
+      </div>
+      <form method="post" class="flex items-center gap-3">
+        {% csrf_token %}
+        <button type="submit"
+                class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition-all">
+          <i class="fas fa-trash-alt"></i>Excluir
+        </button>
+        <a href="{% url 'lista_tipos_servico' %}"
+           class="flex-1 flex items-center justify-center py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors">
+          Cancelar
+        </a>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock %}

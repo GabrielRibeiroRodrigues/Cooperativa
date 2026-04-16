@@ -1,105 +1,173 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Meus Serviços{% endblock %}
+{% block title %}Meus Serviços — Mandik{% endblock %}
+
+{% block head_extra %}
+<style>
+  .mandik-form input,
+  .mandik-form textarea,
+  .mandik-form select {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.95rem;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .mandik-form input:focus,
+  .mandik-form textarea:focus,
+  .mandik-form select:focus {
+    border-color: #2f8f57;
+    box-shadow: 0 0 0 3px rgba(47,143,87,0.15);
+  }
+  .mandik-form label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.35rem;
+  }
+  .mandik-form p { margin-bottom: 1rem; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="h3 mb-0">Meus Serviços</h1>
-        <small class="text-muted">Gerencie serviços oferecidos e valores.</small>
-    </div>
+<!-- Page Header -->
+<div class="mb-6">
+  <p class="text-xs font-bold uppercase tracking-[0.18em] text-mandik-600">Trabalhador</p>
+  <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Meus Serviços</h1>
+  <p class="mt-1 text-sm text-slate-500">Gerencie os serviços que você oferece e seus valores</p>
 </div>
 
-<div class="row g-4">
-    <div class="col-lg-5">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="h6 mb-0">{% if edicao %}Editar serviço{% else %}Adicionar serviço{% endif %}</h2>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button class="btn btn-success" type="submit">
-                        {% if edicao %}Salvar alterações{% else %}Adicionar serviço{% endif %}
-                    </button>
-                    {% if edicao %}
-                        <a href="{% url 'meus_servicos' %}" class="btn btn-outline-secondary ms-2">Cancelar</a>
-                    {% endif %}
-                </form>
-            </div>
-        </div>
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+  <!-- Form Card -->
+  <div class="lg:col-span-2">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden sticky top-4">
+      <div class="relative overflow-hidden bg-gradient-to-r from-mandik-700 to-mandik-900 px-5 py-4">
+        <img src="https://images.unsplash.com/photo-1598301257982-0cf014dabbcd?auto=format&fit=crop&w=600&q=50"
+             alt="" class="absolute inset-0 w-full h-full object-cover opacity-15" loading="lazy">
+        <h2 class="relative text-base font-bold text-white flex items-center gap-2">
+          <i class="fas fa-{% if edicao %}edit{% else %}plus{% endif %}"></i>
+          {% if edicao %}Editar Serviço{% else %}Adicionar Serviço{% endif %}
+        </h2>
+      </div>
+      <div class="px-5 py-5">
+        <form method="post" class="mandik-form space-y-1">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="pt-3 flex items-center gap-3">
+            <button type="submit"
+                    class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-mandik-600 hover:bg-mandik-700 text-white text-sm font-bold transition-all">
+              <i class="fas fa-{% if edicao %}save{% else %}plus{% endif %} text-sm"></i>
+              {% if edicao %}Salvar Alterações{% else %}Adicionar{% endif %}
+            </button>
+            {% if edicao %}
+            <a href="{% url 'meus_servicos' %}"
+               class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors">
+              Cancelar
+            </a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="h6 mb-0">Serviços cadastrados</h2>
+  <!-- Services List -->
+  <div class="lg:col-span-3">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="relative overflow-hidden bg-gradient-to-r from-mandik-700 to-mandik-900 px-5 py-4 flex items-center justify-between">
+        <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=50"
+             alt="" class="absolute inset-0 w-full h-full object-cover opacity-15" loading="lazy">
+        <h2 class="relative text-base font-bold text-white flex items-center gap-2">
+          <i class="fas fa-list-ul"></i>
+          Serviços Cadastrados
+        </h2>
+        <span class="relative bg-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full">{{ lista|length }}</span>
+      </div>
+
+      <div class="divide-y divide-slate-100">
+        {% for item in lista %}
+        <div class="px-5 py-4 transition hover:bg-slate-50/60" id="servico-{{ item.id }}">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 flex-1 min-w-0">
+              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-600">
+                <i class="fas fa-tools text-sm"></i>
+              </div>
+              <div class="min-w-0">
+                <h3 class="font-bold text-slate-800 text-sm leading-tight">{{ item.tipo_servico.nome }}</h3>
+                <p class="text-mandik-600 font-bold text-sm mt-0.5">R$ {{ item.valor_diario|floatformat:2 }}<span class="text-slate-400 font-normal text-xs"> /dia</span></p>
+                <p class="text-xs text-slate-400 mt-0.5 flex items-center gap-1 truncate">
+                  <i class="fas fa-map-marker-alt text-[10px]"></i>
+                  {{ item.localizacao|default:'Localização não informada' }}
+                </p>
+              </div>
             </div>
-            <div class="card-body">
-                {% for item in lista %}
-                    <div class="border rounded p-3 mb-3" id="servico-{{ item.id }}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="h6 mb-1">{{ item.tipo_servico.nome }}</h3>
-                                <p class="mb-1">R$ {{ item.valor_diario|floatformat:2 }}/dia</p>
-                                <p class="mb-1"><small class="text-muted">{{ item.localizacao|default:'Localização não informada' }}</small></p>
-                            </div>
-                            <div class="text-end">
-                                <button
-                                    type="button"
-                                    class="btn btn-sm {% if item.disponivel_agora %}btn-success{% else %}btn-outline-secondary{% endif %} js-toggle-disponivel"
-                                    data-id="{{ item.id }}"
-                                >
-                                    {% if item.disponivel_agora %}Disponível agora{% else %}Indisponível{% endif %}
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mt-2 d-flex gap-2">
-                            <a class="btn btn-outline-primary btn-sm" href="{% url 'editar_meu_servico' item.id %}">Editar</a>
-                            <form method="post" action="{% url 'excluir_meu_servico' item.id %}">
-                                {% csrf_token %}
-                                <button class="btn btn-outline-danger btn-sm" type="submit">Excluir</button>
-                            </form>
-                        </div>
-                    </div>
-                {% empty %}
-                    <div class="alert alert-warning mb-0">Nenhum serviço cadastrado ainda.</div>
-                {% endfor %}
-            </div>
+            <button type="button"
+                    class="js-toggle-disponivel flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all {% if item.disponivel_agora %}bg-mandik-100 text-mandik-700 border border-mandik-200{% else %}bg-slate-100 text-slate-500 border border-slate-200{% endif %}"
+                    data-id="{{ item.id }}">
+              <span class="w-1.5 h-1.5 rounded-full {% if item.disponivel_agora %}bg-mandik-500{% else %}bg-slate-400{% endif %}"></span>
+              {% if item.disponivel_agora %}Disponível{% else %}Indisponível{% endif %}
+            </button>
+          </div>
+          <div class="mt-3 ml-13 flex items-center gap-2 pl-[52px]">
+            <a href="{% url 'editar_meu_servico' item.id %}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors">
+              <i class="fas fa-pen text-[10px]"></i>Editar
+            </a>
+            <form method="post" action="{% url 'excluir_meu_servico' item.id %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold transition-colors">
+                <i class="fas fa-trash text-[10px]"></i>Excluir
+              </button>
+            </form>
+          </div>
         </div>
+        {% empty %}
+        <div class="px-5 py-12 text-center">
+          <div class="w-14 h-14 rounded-2xl bg-mandik-50 flex items-center justify-center mx-auto mb-3">
+            <i class="fas fa-tools text-xl text-mandik-400"></i>
+          </div>
+          <p class="text-slate-500 text-sm font-medium">Nenhum serviço cadastrado ainda.</p>
+          <p class="text-slate-400 text-xs mt-1">Use o formulário ao lado para adicionar um serviço.</p>
+        </div>
+        {% endfor %}
+      </div>
     </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.querySelectorAll('.js-toggle-disponivel').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-        const servicoId = this.dataset.id;
-        fetch(`/marketplace/meus-servicos/${servicoId}/toggle-disponivel/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.ok) {
-                return;
-            }
-            if (data.disponivel_agora) {
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('btn-success');
-                this.textContent = 'Disponível agora';
-            } else {
-                this.classList.remove('btn-success');
-                this.classList.add('btn-outline-secondary');
-                this.textContent = 'Indisponível';
-            }
-        });
+  btn.addEventListener('click', function () {
+    const servicoId = this.dataset.id;
+    fetch(`/marketplace/meus-servicos/${servicoId}/toggle-disponivel/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (!data.ok) return;
+      const dot = this.querySelector('span');
+      if (data.disponivel_agora) {
+        this.className = this.className.replace('bg-slate-100 text-slate-500 border border-slate-200', 'bg-mandik-100 text-mandik-700 border border-mandik-200');
+        dot.className = dot.className.replace('bg-slate-400', 'bg-mandik-500');
+        this.childNodes[this.childNodes.length - 1].textContent = 'Disponível';
+      } else {
+        this.className = this.className.replace('bg-mandik-100 text-mandik-700 border border-mandik-200', 'bg-slate-100 text-slate-500 border border-slate-200');
+        dot.className = dot.className.replace('bg-mandik-500', 'bg-slate-400');
+        this.childNodes[this.childNodes.length - 1].textContent = 'Indisponível';
+      }
     });
+  });
 });
 </script>
 {% endblock %}

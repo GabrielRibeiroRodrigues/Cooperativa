@@ -1,212 +1,207 @@
 {% extends 'core/base.html' %}
 {% load disponibilidade_extras %}
 
-{% block title %}Minha Agenda - Cooperativa Rural{% endblock %}
+{% block title %}Minha Agenda — Mandik{% endblock %}
+
+{% block head_extra %}
+<style>
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+  .day-name {
+    text-align: center;
+    font-weight: 700;
+    color: #64748b;
+    padding-bottom: 8px;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+  .calendar-day {
+    min-height: 100px;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 8px;
+    transition: box-shadow 0.2s;
+    background: #fff;
+  }
+  .calendar-day.empty {
+    background: #fafafa;
+    border-color: transparent;
+  }
+  .calendar-day.today {
+    border-color: #2f8f57;
+    background: #f2fbf5;
+  }
+  .day-number {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #334155;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .calendar-day.today .day-number { color: #1f5f3b; }
+  .slots {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .slot {
+    font-size: 0.68rem;
+    padding: 3px 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    transition: all 0.15s;
+    user-select: none;
+    font-weight: 600;
+  }
+  .slot:hover { transform: translateY(-1px); filter: brightness(0.95); }
+  .slot.status-disponivel {
+    background: #e0f7e7;
+    color: #174d2e;
+    border: 1px solid #bdefc9;
+  }
+  .slot.status-bloqueado {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .slot.status-ocupado {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+    cursor: not-allowed;
+  }
+  @media (max-width: 640px) {
+    .calendar-day { min-height: 70px; padding: 5px; }
+    .slot { font-size: 0.6rem; padding: 2px 3px; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<style>
-    .calendar-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        padding: 20px;
-    }
-    .calendar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-    .month-nav {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #198754;
-    }
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 10px;
-    }
-    .day-name {
-        text-align: center;
-        font-weight: bold;
-        color: #6c757d;
-        padding-bottom: 10px;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-    }
-    .calendar-day {
-        min-height: 120px;
-        border: 1px solid #f0f0f0;
-        border-radius: 10px;
-        padding: 8px;
-        transition: all 0.3s ease;
-        background: #fff;
-    }
-    .calendar-day.empty {
-        background: #fafafa;
-        border: none;
-    }
-    .calendar-day.today {
-        border: 2px solid #198754;
-        background: #e9f7ef;
-    }
-    .day-number {
-        font-weight: bold;
-        margin-bottom: 10px;
-        display: block;
-    }
-    .slots {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-    .slot {
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        border-radius: 6px;
-        cursor: pointer;
-        text-align: center;
-        border: 1px dashed #ccc;
-        transition: 0.2s;
-        user-select: none;
-    }
-    .slot:hover {
-        background: #f8f9fa;
-        transform: translateY(-1px);
-    }
-    /* Status Colors - Simple 2-status Logic */
-    .slot.status-disponivel {
-        background: #e9f7ef; /* Verde bem claro */
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    .slot.status-bloqueado, 
-    .slot.status-ocupado {
-        background: #dc3545; /* Vermelho */
-        color: #fff;
-        border-style: solid;
-        border-color: #dc3545;
-    }
-    .slot.status-ocupado {
-        cursor: not-allowed;
-    }
-    
-    .legend {
-        display: flex;
-        gap: 20px;
-        margin-top: 30px;
-        justify-content: center;
-        font-size: 0.9rem;
-    }
-    .legend-item { display: flex; align-items: center; gap: 8px; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-</style>
-
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="far fa-calendar-alt me-2 text-success"></i>Minha Agenda de Disponibilidade</h1>
-            <button class="btn btn-outline-success" onclick="location.reload()">
-                <i class="fas fa-sync-alt me-1"></i>Atualizar
-            </button>
-        </div>
-        <p class="text-muted">Clique nos turnos (Manhã, Tarde ou Integral) para bloquear ou liberar as datas.</p>
-    </div>
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">Minha Agenda</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Clique nos turnos para bloquear ou liberar disponibilidade</p>
+  </div>
+  <button onclick="location.reload()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition-colors">
+    <i class="fas fa-sync-alt text-xs"></i>
+    Atualizar
+  </button>
 </div>
 
-<div class="calendar-container">
-    <div class="calendar-header">
-        <a href="?mes={{ anterior.mes }}&ano={{ anterior.ano }}" class="btn btn-outline-secondary">
-            <i class="fas fa-chevron-left"></i> Anterior
-        </a>
-        <div class="month-nav">
-            {{ nome_mes }} de {{ ano }}
-        </div>
-        <a href="?mes={{ proximo.mes }}&ano={{ proximo.ano }}" class="btn btn-outline-secondary">
-            Próximo <i class="fas fa-chevron-right"></i>
-        </a>
+<!-- Calendar Card -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+  <!-- Month Nav -->
+  <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+    <a href="?mes={{ anterior.mes }}&ano={{ anterior.ano }}"
+       class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors">
+      <i class="fas fa-chevron-left text-slate-500 text-sm"></i>
+    </a>
+    <h2 class="text-lg font-bold text-slate-800 capitalize">{{ nome_mes }} de {{ ano }}</h2>
+    <a href="?mes={{ proximo.mes }}&ano={{ proximo.ano }}"
+       class="w-9 h-9 rounded-xl border border-slate-200 hover:bg-slate-50 flex items-center justify-center transition-colors">
+      <i class="fas fa-chevron-right text-slate-500 text-sm"></i>
+    </a>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="p-4 sm:p-6">
+    <div class="calendar-grid mb-2">
+      <div class="day-name">Dom</div>
+      <div class="day-name">Seg</div>
+      <div class="day-name">Ter</div>
+      <div class="day-name">Qua</div>
+      <div class="day-name">Qui</div>
+      <div class="day-name">Sex</div>
+      <div class="day-name">Sáb</div>
     </div>
 
     <div class="calendar-grid">
-        <div class="day-name">Dom</div>
-        <div class="day-name">Seg</div>
-        <div class="day-name">Ter</div>
-        <div class="day-name">Qua</div>
-        <div class="day-name">Qui</div>
-        <div class="day-name">Sex</div>
-        <div class="day-name">Sáb</div>
-
-        {% for semana in dias_calendario %}
-            {% for dia, dia_semana in semana %}
-                {% if dia == 0 %}
-                    <div class="calendar-day empty"></div>
-                {% else %}
-                    <div class="calendar-day {% if hoje.year == ano and hoje.month == mes and hoje.day == dia %}today{% endif %}">
-                        <span class="day-number">{{ dia }}</span>
-                        
-                        <div class="slots">
-                            {% for turno_cod, turno_nome in "manha:Manhã,tarde:Tarde,integral:Integral"|split_commas_and_colons %}
-                                <div class="slot slot-{{ turno_cod }} status-{% get_status mapa_disp ano mes dia turno_cod %}" 
-                                     onclick="toggleSlot('{{ ano }}-{{ mes|stringformat:'02i' }}-{{ dia|stringformat:'02i' }}', '{{ turno_cod }}', this)">
-                                    {{ turno_nome }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
+      {% for semana in dias_calendario %}
+        {% for dia, dia_semana in semana %}
+          {% if dia == 0 %}
+            <div class="calendar-day empty"></div>
+          {% else %}
+            <div class="calendar-day {% if hoje.year == ano and hoje.month == mes and hoje.day == dia %}today{% endif %}">
+              <span class="day-number">{{ dia }}</span>
+              <div class="slots">
+                {% for turno_cod, turno_nome in "manha:Manhã,tarde:Tarde,integral:Integral"|split_commas_and_colons %}
+                  <div class="slot slot-{{ turno_cod }} status-{% get_status mapa_disp ano mes dia turno_cod %}"
+                       onclick="toggleSlot('{{ ano }}-{{ mes|stringformat:'02i' }}-{{ dia|stringformat:'02i' }}', '{{ turno_cod }}', this)">
+                    {{ turno_nome }}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
         {% endfor %}
+      {% endfor %}
     </div>
+  </div>
 
-    <div class="legend border-top pt-3">
-        <div class="legend-item"><span class="dot" style="background: #e9f7ef; border: 1px solid #c3e6cb;"></span> Disponível</div>
-        <div class="legend-item"><span class="dot bg-danger"></span> Trabalhando</div>
+  <!-- Legend -->
+  <div class="flex items-center justify-center flex-wrap gap-4 px-6 py-4 border-t border-slate-100 bg-slate-50/60">
+    <p class="w-full text-center text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Legenda</p>
+    <div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+      <span class="w-4 h-4 rounded-md" style="background:#e0f7e7; border: 1px solid #bdefc9;"></span>
+      Disponível
     </div>
+    <div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+      <span class="w-4 h-4 rounded-md" style="background:#fef3c7; border: 1px solid #fde68a;"></span>
+      Bloqueado por mim
+    </div>
+    <div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+      <span class="w-4 h-4 rounded-md" style="background:#fee2e2; border: 1px solid #fca5a5;"></span>
+      Trabalhando (serviço agendado)
+    </div>
+  </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
 <script>
 function toggleSlot(data, turno, element) {
-    if (element.classList.contains('status-ocupado')) {
-        alert('Este horário já está ocupado por um serviço agendado.');
-        return;
+  if (element.classList.contains('status-ocupado')) {
+    alert('Este horário já está ocupado por um serviço agendado.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('data', data);
+  formData.append('turno', turno);
+  formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+  element.style.opacity = '0.5';
+
+  fetch("{% url 'disponibilidade:api_toggle' %}", {
+    method: 'POST',
+    body: formData
+  })
+  .then(async response => {
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Erro no servidor');
+    return data;
+  })
+  .then(data => {
+    element.style.opacity = '1';
+    if (data.status === 'success') {
+      element.classList.remove('status-disponivel', 'status-bloqueado');
+      element.classList.add('status-' + data.novo_status);
     }
-
-    const formData = new FormData();
-    formData.append('data', data);
-    formData.append('turno', turno);
-    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-    element.style.opacity = '0.5';
-
-    fetch("{% url 'disponibilidade:api_toggle' %}", {
-        method: 'POST',
-        body: formData
-    })
-    .then(async response => {
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.message || 'Erro no servidor');
-        }
-        return data;
-    })
-    .then(data => {
-        element.style.opacity = '1';
-        if (data.status === 'success') {
-            element.classList.remove('status-disponivel', 'status-bloqueado');
-            element.classList.add('status-' + data.novo_status);
-        }
-    })
-    .catch(error => {
-        element.style.opacity = '1';
-        console.error('Erro:', error);
-        alert('Ops! Algo deu errado: ' + error.message);
-    });
+  })
+  .catch(error => {
+    element.style.opacity = '1';
+    console.error('Erro:', error);
+    alert('Ops! Algo deu errado: ' + error.message);
+  });
 }
 </script>
 {% endblock %}

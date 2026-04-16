@@ -1,275 +1,565 @@
 {% extends 'core/base.html' %}
 
-{% block title %}Mandik - Conectando Trabalhadores e Contratantes{% endblock %}
+{% block title %}Mandik — Conectando trabalhadores e contratantes do campo{% endblock %}
 
 {% block head_extra %}
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Manrope', 'sans-serif'],
-                },
-                colors: {
-                    mandik: {
-                        50: '#f2fbf5',
-                        100: '#e0f7e7',
-                        200: '#bdefc9',
-                        500: '#2f8f57',
-                        600: '#27774a',
-                        700: '#1f5f3b',
-                        900: '#103222',
-                    }
-                },
-                keyframes: {
-                    rise: {
-                        '0%': { opacity: '0', transform: 'translateY(16px)' },
-                        '100%': { opacity: '1', transform: 'translateY(0)' }
-                    }
-                },
-                animation: {
-                    rise: 'rise 700ms ease-out forwards'
-                }
-            }
-        }
-    }
-</script>
 <style>
-    .mandik-bg {
+    .hero-bg {
         background:
-            radial-gradient(circle at 20% 20%, rgba(47, 143, 87, 0.16), transparent 42%),
-            radial-gradient(circle at 80% 0%, rgba(16, 50, 34, 0.14), transparent 35%),
-            linear-gradient(180deg, #f6fbf8 0%, #edf6f0 100%);
+            radial-gradient(ellipse at 10% 0%,  rgba(47, 143, 87, 0.18) 0%, transparent 50%),
+            radial-gradient(ellipse at 90% 10%, rgba(16, 50,  34, 0.12) 0%, transparent 45%),
+            linear-gradient(160deg, #f4faf6 0%, #eaf4ee 50%, #f0f7f2 100%);
+    }
+    .stats-bg {
+        background: linear-gradient(135deg, #103222 0%, #1f5f3b 50%, #27774a 100%);
+    }
+    .cta-bg {
+        background: linear-gradient(135deg, #1f5f3b 0%, #103222 100%);
+    }
+    .hero-image-overlay {
+        background: linear-gradient(to bottom, rgba(16,50,34,0.35) 0%, rgba(16,50,34,0.05) 60%, transparent 100%);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section class="mandik-bg -mx-3 sm:-mx-4 lg:-mx-6 px-4 pb-16 pt-10 sm:px-6 lg:px-10">
+
+<!-- ═══════════════════════════════════════════
+     HERO SECTION
+═══════════════════════════════════════════ -->
+<section class="hero-bg -mx-4 -mt-6 px-4 pb-16 pt-10 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
     <div class="mx-auto max-w-6xl">
-        <div class="grid gap-8 lg:grid-cols-2 lg:items-center">
+        <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+
+            <!-- Left: Copy & CTAs -->
             <div class="animate-rise">
-                <span class="inline-flex items-center gap-2 rounded-full bg-mandik-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-mandik-700">
-                    <i class="fas fa-seedling" aria-hidden="true"></i>
-                    Novo nome, mesma confianca
+                <span class="inline-flex items-center gap-2 rounded-full bg-mandik-100 px-3.5 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-mandik-700">
+                    <i class="fas fa-seedling text-mandik-500"></i>
+                    Plataforma rural profissional
                 </span>
-                <h1 class="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-mandik-900 sm:text-4xl lg:text-5xl">
+
+                <h1 class="mt-5 text-4xl font-extrabold leading-[1.12] tracking-tight text-mandik-900 sm:text-5xl lg:text-[3.2rem]">
                     Mandik conecta quem contrata e quem faz o campo acontecer.
                 </h1>
-                <p class="mt-4 max-w-xl text-base leading-relaxed text-slate-700 sm:text-lg">
-                    Uma plataforma profissional para encontrar servicos rurais com transparencia, reputacao e comunicacao direta entre contratantes e trabalhadores.
+
+                <p class="mt-5 max-w-lg text-base leading-relaxed text-slate-600 sm:text-lg">
+                    Encontre profissionais rurais com histórico verificado, negocie com transparência e gerencie toda a jornada de trabalho em um só lugar.
                 </p>
 
-                <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center" role="group" aria-label="Acoes principais">
-                    <div class="dropdown">
-                        <button
-                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-mandik-600/25 transition hover:bg-mandik-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700 sm:w-auto"
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            <i class="fas fa-user-plus" aria-hidden="true"></i>
-                            Criar conta
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <li><a class="dropdown-item" href="{% url 'registro_contratante' %}">Como Contratante</a></li>
-                            <li><a class="dropdown-item" href="{% url 'registro_trabalhador' %}">Como Trabalhador</a></li>
-                        </ul>
+                <!-- CTA Buttons -->
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    {% if user.is_authenticated %}
+                        <a href="{% if user.role == 'contratante' %}{% url 'painel_contratante' %}{% else %}{% url 'painel_trabalhador' %}{% endif %}"
+                           class="inline-flex items-center justify-center gap-2 rounded-xl bg-mandik-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-mandik-600/30 transition hover:bg-mandik-700 hover:shadow-xl hover:shadow-mandik-600/25 focus:outline-none no-underline">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Ir ao Painel
+                        </a>
+                    {% else %}
+                        <!-- Trigger Alpine dropdown -->
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" @click.outside="open = false"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-mandik-600 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-mandik-600/30 transition hover:bg-mandik-700 sm:w-auto focus:outline-none">
+                                <i class="fas fa-user-plus"></i>
+                                Criar conta grátis
+                                <i class="fas fa-chevron-down text-xs transition-transform" :class="open ? 'rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open"
+                                 x-transition:enter="transition ease-out duration-150"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 class="absolute left-0 top-full z-10 mt-2 w-60 rounded-2xl border border-slate-100 bg-white py-1.5 shadow-2xl"
+                                 style="display:none;">
+                                <a href="{% url 'registro_contratante' %}"
+                                   class="flex items-center gap-3 px-4 py-3 no-underline hover:bg-mandik-50">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">Sou Contratante</p>
+                                        <p class="text-xs text-slate-500">Quero contratar trabalhadores</p>
+                                    </div>
+                                </a>
+                                <div class="mx-3 my-1 border-t border-slate-100"></div>
+                                <a href="{% url 'registro_trabalhador' %}"
+                                   class="flex items-center gap-3 px-4 py-3 no-underline hover:bg-mandik-50">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
+                                        <i class="fas fa-tractor"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">Sou Trabalhador</p>
+                                        <p class="text-xs text-slate-500">Quero encontrar trabalho</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'login' %}"
+                           class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-mandik-200 bg-white px-7 py-3.5 text-sm font-bold text-mandik-700 transition hover:border-mandik-300 hover:bg-mandik-50 sm:w-auto focus:outline-none no-underline">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Já tenho conta
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Social proof -->
+                <div class="mt-8 flex items-center gap-4">
+                    <div class="flex -space-x-2">
+                        <img src="https://i.pravatar.cc/32?img=11" alt="" class="h-8 w-8 rounded-full border-2 border-white object-cover">
+                        <img src="https://i.pravatar.cc/32?img=22" alt="" class="h-8 w-8 rounded-full border-2 border-white object-cover">
+                        <img src="https://i.pravatar.cc/32?img=33" alt="" class="h-8 w-8 rounded-full border-2 border-white object-cover">
+                        <img src="https://i.pravatar.cc/32?img=44" alt="" class="h-8 w-8 rounded-full border-2 border-white object-cover">
                     </div>
-                    <a
-                        href="{% url 'login' %}"
-                        class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-mandik-200 bg-white px-6 py-3 text-sm font-semibold text-mandik-700 transition hover:border-mandik-300 hover:bg-mandik-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mandik-700 sm:w-auto"
+                    <div>
+                        <div class="flex items-center gap-0.5">
+                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                            <i class="fas fa-star text-amber-400 text-xs"></i>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-600 mt-0.5">Já confiado por centenas de produtores</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Hero image card -->
+            <div class="animate-rise" style="animation-delay: 150ms;">
+                <div class="relative overflow-hidden rounded-3xl shadow-2xl shadow-mandik-900/20">
+                    <!-- Main image -->
+                    <img
+                        src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=900&q=85"
+                        alt="Trabalhador rural no campo ao entardecer"
+                        class="h-[420px] w-full object-cover"
+                        loading="lazy"
                     >
-                        <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
-                        Entrar
+                    <div class="hero-image-overlay absolute inset-0"></div>
+
+                    <!-- Overlay badge top -->
+                    <div class="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-sm">
+                        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="text-xs font-bold text-slate-800">Plataforma ativa</span>
+                    </div>
+
+                    <!-- Floating stat cards -->
+                    <div class="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2">
+                        <div class="rounded-2xl bg-white/90 px-3 py-2.5 text-center shadow-lg backdrop-blur-sm">
+                            <p class="text-xl font-extrabold text-mandik-700">500+</p>
+                            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Trabalhadores</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/90 px-3 py-2.5 text-center shadow-lg backdrop-blur-sm">
+                            <p class="text-xl font-extrabold text-mandik-700">200+</p>
+                            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Contratantes</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/90 px-3 py-2.5 text-center shadow-lg backdrop-blur-sm">
+                            <p class="text-xl font-extrabold text-mandik-700">1k+</p>
+                            <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Serviços</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FEATURES SECTION
+═══════════════════════════════════════════ -->
+<section class="py-16" aria-label="Benefícios da plataforma">
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-10 text-center">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-mandik-600">Por que escolher a Mandik?</p>
+            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                Tudo que você precisa em um só lugar
+            </h2>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-3">
+            <!-- Card: Contratantes -->
+            <article class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:border-mandik-200">
+                <div class="h-40 w-full overflow-hidden">
+                    <img
+                        src="https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=600&q=80"
+                        alt="Plantação verde"
+                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="-mt-10 mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/30">
+                        <i class="fas fa-users text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Para Contratantes</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                        Encontre profissionais rurais verificados pela região e especialidade, com total transparência nas avaliações.
+                    </p>
+                    <ul class="mt-4 space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Busca por região e especialidade
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Sistema de avaliações mútuas
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Chat direto com o trabalhador
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Controle de jornada de trabalho
+                        </li>
+                    </ul>
+                    <a href="{% url 'registro_contratante' %}"
+                       class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-mandik-600 no-underline hover:text-mandik-700">
+                        Começar agora <i class="fas fa-arrow-right text-xs"></i>
                     </a>
                 </div>
-            </div>
+            </article>
 
-            <div class="animate-rise rounded-3xl border border-white/70 bg-white/80 p-6 backdrop-blur-sm" style="animation-delay: 120ms;">
-                <div class="grid grid-cols-2 gap-4">
-                    <article class="rounded-2xl bg-mandik-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-mandik-700">Confianca</p>
-                        <p class="mt-2 text-sm text-slate-700">Avaliacoes e historico de servicos em um so lugar.</p>
-                    </article>
-                    <article class="rounded-2xl bg-slate-100 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-700">Agilidade</p>
-                        <p class="mt-2 text-sm text-slate-700">Converse e feche acordos sem sair da plataforma.</p>
-                    </article>
-                    <article class="col-span-2 rounded-2xl bg-mandik-900 p-5 text-white">
-                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-mandik-100">Mandik</p>
-                        <p class="mt-3 text-lg font-bold">Tecnologia com pe no campo.</p>
-                        <p class="mt-2 text-sm text-mandik-100">Do primeiro contato a avaliacao final, tudo organizado para reduzir risco e aumentar produtividade.</p>
-                    </article>
+            <!-- Card: Trabalhadores -->
+            <article class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:border-mandik-200">
+                <div class="h-40 w-full overflow-hidden">
+                    <img
+                        src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=600&q=80"
+                        alt="Trabalhador rural"
+                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    >
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="mx-auto max-w-6xl px-1 py-10 sm:px-2 lg:py-14" aria-label="Beneficios da plataforma">
-    <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
-                <i class="fas fa-users text-lg" aria-hidden="true"></i>
-            </div>
-            <h2 class="text-xl font-bold text-slate-900">Para Contratantes</h2>
-            <p class="mt-3 text-sm leading-relaxed text-slate-600">Encontre profissionais por regiao e especialidade, com transparencia nas avaliacoes.</p>
-            <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Busca por regiao e especialidade</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Sistema de avaliacoes</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Chat direto com o trabalhador</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Controle de jornada</li>
-            </ul>
-        </article>
-
-        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
-                <i class="fas fa-tools text-lg" aria-hidden="true"></i>
-            </div>
-            <h2 class="text-xl font-bold text-slate-900">Para Trabalhadores</h2>
-            <p class="mt-3 text-sm leading-relaxed text-slate-600">Receba propostas, organize sua agenda e fortaleza sua reputacao com entregas bem avaliadas.</p>
-            <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Receba propostas de trabalho</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Controle sua agenda</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Registre suas horas de trabalho</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Receba avaliacoes</li>
-            </ul>
-        </article>
-
-        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg md:col-span-2 lg:col-span-1">
-            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-100 text-mandik-700">
-                <i class="fas fa-shield-alt text-lg" aria-hidden="true"></i>
-            </div>
-            <h2 class="text-xl font-bold text-slate-900">Seguranca e Confianca</h2>
-            <p class="mt-3 text-sm leading-relaxed text-slate-600">Processo transparente com registro de interacoes, jornada e historico de servicos.</p>
-            <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Perfis verificados</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Historico de trabalhos</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Chat interno</li>
-                <li><i class="fas fa-check mr-2 text-mandik-600" aria-hidden="true"></i>Controle automatizado de horas</li>
-            </ul>
-        </article>
-    </div>
-</section>
-
-<section class="mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-8" aria-label="Como funciona">
-    <h2 class="text-center text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">Como funciona</h2>
-    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <article class="rounded-2xl bg-slate-50 p-5">
-            <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700">
-                <i class="fas fa-user-plus" aria-hidden="true"></i>
-            </div>
-            <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900">1. Cadastre-se</h3>
-            <p class="mt-2 text-sm text-slate-600">Crie seu perfil como contratante ou trabalhador.</p>
-        </article>
-        <article class="rounded-2xl bg-slate-50 p-5">
-            <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700">
-                <i class="fas fa-search" aria-hidden="true"></i>
-            </div>
-            <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900">2. Busque/Receba</h3>
-            <p class="mt-2 text-sm text-slate-600">Encontre trabalhos ou receba propostas qualificadas.</p>
-        </article>
-        <article class="rounded-2xl bg-slate-50 p-5">
-            <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700">
-                <i class="fas fa-handshake" aria-hidden="true"></i>
-            </div>
-            <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900">3. Contrate</h3>
-            <p class="mt-2 text-sm text-slate-600">Feche acordos com clareza de preco e jornada.</p>
-        </article>
-        <article class="rounded-2xl bg-slate-50 p-5">
-            <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-mandik-100 text-mandik-700">
-                <i class="fas fa-star" aria-hidden="true"></i>
-            </div>
-            <h3 class="text-sm font-bold uppercase tracking-wide text-slate-900">4. Avalie</h3>
-            <p class="mt-2 text-sm text-slate-600">Fortalezca reputacoes com feedbacks objetivos.</p>
-        </article>
-    </div>
-</section>
-        </div>
-        
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <div class="text-success mb-3">
-                        <i class="fas fa-tools fa-3x"></i>
+                <div class="p-6">
+                    <div class="-mt-10 mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/30">
+                        <i class="fas fa-tractor text-lg"></i>
                     </div>
-                    <h5 class="card-title">Para Trabalhadores</h5>
-                    <p class="card-text">
-                        Encontre oportunidades de trabalho no campo. 
-                        Defina seu valor diário e construa sua reputação.
+                    <h3 class="text-xl font-bold text-slate-900">Para Trabalhadores</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                        Receba propostas, organize sua agenda e fortaleça sua reputação com entregas bem avaliadas.
                     </p>
-                    <ul class="list-unstyled text-start">
-                        <li><i class="fas fa-check text-success me-2"></i>Receba propostas de trabalho</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Controle sua agenda</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Registre suas horas de trabalho</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Receba avaliações</li>
+                    <ul class="mt-4 space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Receba propostas de trabalho
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Controle sua agenda de disponibilidade
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Registre horas com controle de jornada
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Construa seu histórico de avaliações
+                        </li>
+                    </ul>
+                    <a href="{% url 'registro_trabalhador' %}"
+                       class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-mandik-600 no-underline hover:text-mandik-700">
+                        Começar agora <i class="fas fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+            </article>
+
+            <!-- Card: Segurança -->
+            <article class="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:border-mandik-200">
+                <div class="h-40 w-full overflow-hidden">
+                    <img
+                        src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=600&q=80"
+                        alt="Campo verde ao amanhecer"
+                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    >
+                </div>
+                <div class="p-6">
+                    <div class="-mt-10 mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/30">
+                        <i class="fas fa-shield-alt text-lg"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900">Segurança e Confiança</h3>
+                    <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                        Processo transparente com registro de interações, jornada e histórico completo de serviços.
+                    </p>
+                    <ul class="mt-4 space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Perfis com CPF verificado
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Histórico completo de trabalhos
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Chat interno e contratos formais
+                        </li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700">
+                            <i class="fas fa-check-circle text-mandik-500 shrink-0"></i>
+                            Controle automatizado de horas
+                        </li>
                     </ul>
                 </div>
+            </article>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PHOTO GALLERY — Do Campo à Plataforma
+═══════════════════════════════════════════ -->
+<section class="py-4 pb-16" aria-label="Galeria do campo">
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-8 text-center">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-mandik-600">Do campo à plataforma</p>
+            <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                O trabalho rural que a Mandik conecta
+            </h2>
+        </div>
+        <!-- Mosaic grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-[160px] md:auto-rows-[180px]">
+            <!-- Tall left image -->
+            <div class="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=400&q=80"
+                     alt="Trabalhadores na colheita" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+            </div>
+            <!-- Top center -->
+            <div class="col-span-2 row-span-1 rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=800&q=80"
+                     alt="Colheita de milho" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+            </div>
+            <!-- Top right -->
+            <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=400&q=80"
+                     alt="Equipamento agrícola" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+            </div>
+            <!-- Bottom center-left -->
+            <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1598301257982-0cf014dabbcd?auto=format&fit=crop&w=400&q=80"
+                     alt="Plantação de café" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+            </div>
+            <!-- Bottom center-right -->
+            <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden shadow-sm relative group">
+                <img src="https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?auto=format&fit=crop&w=400&q=80"
+                     alt="Paisagem rural" class="w-full h-full object-cover hover:scale-105 transition duration-500" loading="lazy">
+            </div>
+            <!-- Bottom right - CTA tile -->
+            <div class="col-span-1 row-span-1 rounded-2xl overflow-hidden shadow-sm bg-gradient-to-br from-mandik-600 to-mandik-800 flex flex-col items-center justify-center p-5 text-center">
+                <i class="fas fa-seedling text-3xl text-white/80 mb-2"></i>
+                <p class="text-white font-bold text-sm leading-tight">Mais de 15 tipos de serviço rural</p>
+                <a href="{% url 'lista_demandas' %}" class="mt-3 text-xs font-bold text-mandik-200 hover:text-white transition-colors no-underline">
+                    Ver demandas <i class="fas fa-arrow-right ml-1"></i>
+                </a>
             </div>
         </div>
-        
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <div class="text-success mb-3">
-                        <i class="fas fa-shield-alt fa-3x"></i>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     STATS STRIP
+═══════════════════════════════════════════ -->
+<section class="stats-bg -mx-4 px-4 py-14 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" aria-label="Números da plataforma">
+    <div class="mx-auto max-w-6xl">
+        <div class="grid grid-cols-2 gap-6 text-center text-white lg:grid-cols-4">
+            <div>
+                <p class="text-4xl font-extrabold tracking-tight text-white">500+</p>
+                <p class="mt-1 text-sm font-semibold text-mandik-100">Trabalhadores cadastrados</p>
+            </div>
+            <div>
+                <p class="text-4xl font-extrabold tracking-tight text-white">200+</p>
+                <p class="mt-1 text-sm font-semibold text-mandik-100">Contratantes ativos</p>
+            </div>
+            <div>
+                <p class="text-4xl font-extrabold tracking-tight text-white">1.200+</p>
+                <p class="mt-1 text-sm font-semibold text-mandik-100">Serviços realizados</p>
+            </div>
+            <div>
+                <p class="text-4xl font-extrabold tracking-tight text-white">4.8 ★</p>
+                <p class="mt-1 text-sm font-semibold text-mandik-100">Avaliação média</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     HOW IT WORKS
+═══════════════════════════════════════════ -->
+<section class="py-16" aria-label="Como funciona">
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-10 text-center">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-mandik-600">Simples e rápido</p>
+            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                Como funciona?
+            </h2>
+        </div>
+
+        <div class="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Connector line (desktop) -->
+            <div class="absolute top-8 left-[12.5%] right-[12.5%] hidden h-0.5 bg-mandik-100 lg:block" aria-hidden="true"></div>
+
+            <!-- Step 1 -->
+            <article class="relative rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/25 text-xl font-extrabold">
+                    1
+                </div>
+                <div class="mb-3 flex justify-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-50 text-mandik-600">
+                        <i class="fas fa-user-plus text-xl"></i>
                     </div>
-                    <h5 class="card-title">Segurança e Confiança</h5>
-                    <p class="card-text">
-                        Plataforma segura com sistema de avaliações mútuas 
-                        e controle transparente de jornada de trabalho.
-                    </p>
-                    <ul class="list-unstyled text-start">
-                        <li><i class="fas fa-check text-success me-2"></i>Perfis verificados</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Histórico de trabalhos</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Sistema de chat interno</li>
-                        <li><i class="fas fa-check text-success me-2"></i>Controle de horas automatizado</li>
-                    </ul>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Cadastre-se</h3>
+                <p class="mt-2 text-sm text-slate-500">Crie seu perfil como contratante ou trabalhador em minutos.</p>
+            </article>
+
+            <!-- Step 2 -->
+            <article class="relative rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/25 text-xl font-extrabold">
+                    2
+                </div>
+                <div class="mb-3 flex justify-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-50 text-mandik-600">
+                        <i class="fas fa-search text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Busque ou Receba</h3>
+                <p class="mt-2 text-sm text-slate-500">Encontre trabalhos ou receba propostas qualificadas pelo sistema.</p>
+            </article>
+
+            <!-- Step 3 -->
+            <article class="relative rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/25 text-xl font-extrabold">
+                    3
+                </div>
+                <div class="mb-3 flex justify-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-50 text-mandik-600">
+                        <i class="fas fa-handshake text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Contrate</h3>
+                <p class="mt-2 text-sm text-slate-500">Feche acordos com clareza de preço, jornada e contrato formal.</p>
+            </article>
+
+            <!-- Step 4 -->
+            <article class="relative rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-mandik-600 text-white shadow-lg shadow-mandik-600/25 text-xl font-extrabold">
+                    4
+                </div>
+                <div class="mb-3 flex justify-center">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-mandik-50 text-mandik-600">
+                        <i class="fas fa-star text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Avalie</h3>
+                <p class="mt-2 text-sm text-slate-500">Fortaleça reputações com feedbacks objetivos após cada serviço.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     TESTIMONIALS
+═══════════════════════════════════════════ -->
+<section class="py-4 pb-16" aria-label="Depoimentos">
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-10 text-center">
+            <p class="text-xs font-bold uppercase tracking-[0.2em] text-mandik-600">Quem usa, recomenda</p>
+            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                O que dizem nossos usuários
+            </h2>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-3">
+            <!-- Testimonial 1 -->
+            <div class="relative overflow-hidden rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition p-6">
+                <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-3xl overflow-hidden opacity-10">
+                    <img src="https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=200&q=60" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex items-center gap-1 mb-4">
+                    {% for i in "12345" %}<i class="fas fa-star text-amber-400 text-sm"></i>{% endfor %}
+                </div>
+                <p class="text-slate-700 text-sm leading-relaxed mb-5">
+                    "Encontrei trabalhadores qualificados para a colheita em menos de uma semana. O sistema de controle de jornada me economizou horas de gestão."
+                </p>
+                <div class="flex items-center gap-3">
+                    <img src="https://i.pravatar.cc/48?img=3" alt="João Silva" class="w-10 h-10 rounded-full object-cover border-2 border-mandik-100">
+                    <div>
+                        <p class="text-sm font-bold text-slate-800">João Silva</p>
+                        <p class="text-xs text-mandik-600">Produtor rural, Minas Gerais</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonial 2 -->
+            <div class="relative overflow-hidden rounded-3xl bg-mandik-600 shadow-lg shadow-mandik-600/20 p-6">
+                <div class="absolute top-0 right-0 w-32 h-32 opacity-10">
+                    <i class="fas fa-quote-right text-8xl text-white absolute top-2 right-2"></i>
+                </div>
+                <div class="flex items-center gap-1 mb-4">
+                    {% for i in "12345" %}<i class="fas fa-star text-amber-300 text-sm"></i>{% endfor %}
+                </div>
+                <p class="text-mandik-100 text-sm leading-relaxed mb-5">
+                    "Consigo organizar minha agenda de disponibilidade, receber propostas e assinar contratos tudo pela plataforma. Profissionalismo de verdade."
+                </p>
+                <div class="flex items-center gap-3">
+                    <img src="https://i.pravatar.cc/48?img=15" alt="Maria Santos" class="w-10 h-10 rounded-full object-cover border-2 border-white/30">
+                    <div>
+                        <p class="text-sm font-bold text-white">Maria Santos</p>
+                        <p class="text-xs text-mandik-200">Trabalhadora rural, São Paulo</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonial 3 -->
+            <div class="relative overflow-hidden rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition p-6">
+                <div class="absolute top-0 right-0 w-24 h-24 rounded-bl-3xl overflow-hidden opacity-10">
+                    <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=200&q=60" alt="" class="w-full h-full object-cover">
+                </div>
+                <div class="flex items-center gap-1 mb-4">
+                    {% for i in "12345" %}<i class="fas fa-star text-amber-400 text-sm"></i>{% endfor %}
+                </div>
+                <p class="text-slate-700 text-sm leading-relaxed mb-5">
+                    "A geração automática de contrato e a assinatura digital pelo gov.br foi um diferencial enorme. Tudo formalizado e seguro."
+                </p>
+                <div class="flex items-center gap-3">
+                    <img src="https://i.pravatar.cc/48?img=28" alt="Carlos Nunes" class="w-10 h-10 rounded-full object-cover border-2 border-mandik-100">
+                    <div>
+                        <p class="text-sm font-bold text-slate-800">Carlos Nunes</p>
+                        <p class="text-xs text-mandik-600">Fazendeiro, Goiás</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="row mt-5">
-        <div class="col-lg-8 mx-auto text-center">
-            <h2 class="mb-4">Como funciona?</h2>
-            <div class="row">
-                <div class="col-md-3 mb-4">
-                    <div class="text-success mb-2">
-                        <i class="fas fa-user-plus fa-2x"></i>
-                    </div>
-                    <h6>1. Cadastre-se</h6>
-                    <p class="small text-muted">Crie seu perfil como contratante ou trabalhador</p>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="text-success mb-2">
-                        <i class="fas fa-search fa-2x"></i>
-                    </div>
-                    <h6>2. Busque/Receba</h6>
-                    <p class="small text-muted">Encontre trabalhos ou receba propostas</p>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="text-success mb-2">
-                        <i class="fas fa-handshake fa-2x"></i>
-                    </div>
-                    <h6>3. Contrate</h6>
-                    <p class="small text-muted">Aceite a proposta e inicie o trabalho</p>
-                </div>
-                <div class="col-md-3 mb-4">
-                    <div class="text-success mb-2">
-                        <i class="fas fa-star fa-2x"></i>
-                    </div>
-                    <h6>4. Avalie</h6>
-                    <p class="small text-muted">Deixe sua avaliação e construa reputação</p>
-                </div>
-            </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     CTA FINAL
+═══════════════════════════════════════════ -->
+{% if not user.is_authenticated %}
+<section class="cta-bg -mx-4 px-4 py-16 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8" aria-label="Chamada para ação">
+    <div class="mx-auto max-w-3xl text-center">
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-mandik-200">Comece hoje mesmo</p>
+        <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            Pronto para transformar sua forma de trabalhar no campo?
+        </h2>
+        <p class="mt-4 text-base leading-relaxed text-mandik-100">
+            Cadastro gratuito. Sem mensalidades. Comece a conectar com profissionais rurais agora mesmo.
+        </p>
+        <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <a href="{% url 'registro_contratante' %}"
+               class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-bold text-mandik-700 shadow-lg transition hover:bg-mandik-50 sm:w-auto no-underline">
+                <i class="fas fa-briefcase"></i>
+                Cadastrar como Contratante
+            </a>
+            <a href="{% url 'registro_trabalhador' %}"
+               class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/10 px-7 py-3.5 text-sm font-bold text-white shadow-lg backdrop-blur-sm transition hover:bg-white/20 sm:w-auto no-underline">
+                <i class="fas fa-tractor"></i>
+                Cadastrar como Trabalhador
+            </a>
         </div>
     </div>
-</div>
+</section>
+{% endif %}
+
 {% endblock %}
